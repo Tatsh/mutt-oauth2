@@ -670,6 +670,7 @@ local manifestYaml(value) =
         },
         dependencies: {
           python: '>=3.%s,<4' % min_python_minor_version,
+          click: '^8.1.7',
           keyring: '^25.5.0',
           requests: '^2.32.3',
         },

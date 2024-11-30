@@ -62,6 +62,7 @@ repository = "https://github.com/Tatsh/mutt-oauth2"
 version = "0.0.1"
 
 [tool.poetry.dependencies]
+click = "^8.1.7"
 keyring = "^25.5.0"
 python = ">=3.10,<4"
 requests = "^2.32.3"
