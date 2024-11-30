@@ -1,0 +1,10 @@
+*~
+.*_cache/
+.coverage
+.directory
+.pnp.*
+/.yarn/install-state.gz
+/dist/
+__pycache__/
+htmlcov/
+node_modules/

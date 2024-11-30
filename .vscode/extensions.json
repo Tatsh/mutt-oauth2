@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "aaron-bond.better-comments",
+    "davidanson.vscode-markdownlint",
+    "eeyore.yapf",
+    "pascalreitermann93.vscode-yaml-sort",
+    "redhat.vscode-xml",
+    "redhat.vscode-yaml"
+  ]
+}
