@@ -59,7 +59,7 @@ license = "MIT"
 name = "mutt-oauth2"
 readme = "README.md"
 repository = "https://github.com/Tatsh/mutt-oauth2"
-version = "0.0.1"
+version = "0.0.2"
 
 [tool.poetry.dependencies]
 click = "^8.1.7"

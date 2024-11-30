@@ -1,6 +1,6 @@
 local project_name = 'mutt-oauth2';
 local date_released = '2024-11-30';
-local version = '0.0.1';
+local version = '0.0.2';
 
 local authors = ['Andrew Udvare <audvare@gmail.com>'];
 local citation_authors = [
