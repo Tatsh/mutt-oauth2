@@ -10,7 +10,7 @@ version_files = [
   ".project.jsonnet",
   "CITATION.cff",
   "README.md",
-  "mutt-oauth2/__init__.py",
+  "mutt_oauth2/__init__.py",
   "package.json",
 ]
 version_provider = "poetry"
@@ -46,6 +46,8 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Typing :: Typed",
 ]
@@ -111,7 +113,7 @@ Issues = "https://github.com/Tatsh/mutt-oauth2/issues"
 [tool.pyright]
 deprecateTypingAliases = true
 enableExperimentalFeatures = true
-include = ["./mutt-oauth2", "./tests"]
+include = ["./mutt_oauth2", "./tests"]
 pythonPlatform = "Linux"
 pythonVersion = "3.10"
 reportCallInDefaultInitializer = "warning"

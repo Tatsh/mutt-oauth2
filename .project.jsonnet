@@ -23,12 +23,12 @@ local github_funding = {
 local github_theme = 'jekyll-theme-hacker';
 local keywords = ['email', 'gmail', 'mutt', 'outlook'];
 local license = 'MIT';
-local module_name = project_name;
+local module_name = std.strReplace(project_name, '-', '_');
 local repository_name = project_name;
 local repository_uri = 'https://github.com/%s/%s' % [github_username, project_name];
 
 local min_python_minor_version = '10';
-local supported_python_versions = ['3.%s' % min_python_minor_version] + [('3.%s' % i) for i in [10, 11, 12, 13]];
+local supported_python_versions = [('3.%s' % i) for i in [min_python_minor_version, 11, 12, 13]];
 local yarn_version = '4.5.0';
 
 local shared_ignore = [
@@ -670,6 +670,8 @@ local manifestYaml(value) =
         },
         dependencies: {
           python: '>=3.%s,<4' % min_python_minor_version,
+          keyring: '^25.5.0',
+          requests: '^2.32.3',
         },
         group: {
           dev: {
@@ -678,6 +680,7 @@ local manifestYaml(value) =
               commitizen: '^4.0.0',
               mypy: '^1.13.0',
               ruff: '^0.8.0',
+              'types-requests': '^2.32.0.20241016',
               yapf: '^0.43.0',
             },
           },
@@ -701,12 +704,12 @@ local manifestYaml(value) =
               pytest: '^8.3.3',
               'pytest-cov': '^5.0.0',
               'pytest-mock': '^3.14.0',
+              'requests-mock': '^1.12.1',
             },
           },
         },
         scripts: {
-          bw: '%s.main:%s_main' % [module_name, module_name],
-          hgit: '%s.main:git' % [module_name],
+          'mutt-oauth2': '%s.main:main' % module_name,
         },
       },
       commitizen: {
