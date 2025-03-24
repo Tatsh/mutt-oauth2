@@ -2346,7 +2346,7 @@ __metadata:
     prettier-plugin-ini: "npm:^1.3.0"
     prettier-plugin-sort-json: "npm:^4.1.1"
     prettier-plugin-toml: "npm:^2.0.2"
-    pyright: "npm:^1.1.396"
+    pyright: "npm:^1.1.397"
     yarn-audit-fix: "npm:^10.1.0"
   languageName: unknown
   linkType: soft
@@ -2558,9 +2558,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pyright@npm:^1.1.396":
-  version: 1.1.396
-  resolution: "pyright@npm:1.1.396"
+"pyright@npm:^1.1.397":
+  version: 1.1.397
+  resolution: "pyright@npm:1.1.397"
   dependencies:
     fsevents: "npm:~2.3.3"
   dependenciesMeta:
@@ -2569,7 +2569,7 @@ __metadata:
   bin:
     pyright: index.js
     pyright-langserver: langserver.index.js
-  checksum: 10c0/ed2b8b2bf2a89cb0aeb71bfec183113497a3555070a202b70d5f93357a29b9b2ed0cc7f70f0aba82d230dbf68074eb367b2c3143fb259c5c82274cb40d74e2ff
+  checksum: 10c0/2dbfcb356a69a97a1d76d98b648f653907afcc749ece0e92bb02bcb01f4297faf51933d80c5b59a4d094bf8887058efc4de43dab5e99eac9441cc34bba12de66
   languageName: node
   linkType: hard
 
