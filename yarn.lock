@@ -2345,7 +2345,7 @@ __metadata:
     prettier: "npm:^3.5.3"
     prettier-plugin-ini: "npm:^1.3.0"
     prettier-plugin-sort-json: "npm:^4.1.1"
-    prettier-plugin-toml: "npm:^2.0.2"
+    prettier-plugin-toml: "npm:^2.0.3"
     pyright: "npm:^1.1.397"
     yarn-audit-fix: "npm:^10.1.0"
   languageName: unknown
@@ -2505,14 +2505,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier-plugin-toml@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "prettier-plugin-toml@npm:2.0.2"
+"prettier-plugin-toml@npm:^2.0.3":
+  version: 2.0.3
+  resolution: "prettier-plugin-toml@npm:2.0.3"
   dependencies:
     "@taplo/lib": "npm:^0.4.0-alpha.2"
   peerDependencies:
     prettier: ^3.0.3
-  checksum: 10c0/e48c8d4e6eaf422a09adab7fe0b7edb23bac703a1d15e462f2c8531c3b0edaf4e00a5a1f794732aaf7788628f40d7c704d82e2d72ccdba00741f94128cb67aa3
+  checksum: 10c0/bd88b4c941675653a79fc21cce791b9542657b4b23a8874f28a9f1ccdbfd7745c3a14fe9d469a899db217dd26c3e88a635909074b7ee3c65d0d050dffb2f1260
   languageName: node
   linkType: hard
 
