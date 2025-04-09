@@ -114,5 +114,5 @@
     "ruff:fix": "poetry run ruff check --fix",
     "test": "poetry run pytest"
   },
-  "version": "0.0.2"
+  "version": "0.0.3"
 }

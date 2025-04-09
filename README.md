@@ -7,7 +7,7 @@
 ![PyPI - Version](https://img.shields.io/pypi/v/mutt-oauth2)
 ![GitHub tag (with filter)](https://img.shields.io/github/v/tag/Tatsh/mutt-oauth2)
 ![GitHub](https://img.shields.io/github/license/Tatsh/mutt-oauth2)
-![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/commits-since/Tatsh/mutt-oauth2/v0.0.2/master)
+![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/commits-since/Tatsh/mutt-oauth2/v0.0.3/master)
 
 This is an update of [Alexander Perlis' script](https://github.com/muttmua/mutt/blob/master/contrib/mutt_oauth2.py)
 and conversion to a package. Instead of using GPG for token storage, this package uses Keyring.
