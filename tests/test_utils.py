@@ -388,7 +388,7 @@ def test_try_auth_raises_runtime_error_on_imap_auth(mocker: MockerFixture) -> No
                                                  pop_endpoint='pop.example.com',
                                                  smtp_endpoint='smtp.example.com',
                                                  scope='email'))
-    with pytest.raises(RuntimeError, match='.*'):
+    with pytest.raises(RuntimeError, match=r'.*'):
         try_auth(token)
 
 
@@ -411,7 +411,7 @@ def test_try_auth_raises_runtime_error_on_pop_auth(mocker: MockerFixture) -> Non
                                                  pop_endpoint='pop.example.com',
                                                  smtp_endpoint='smtp.example.com',
                                                  scope='email'))
-    with pytest.raises(RuntimeError, match='.*'):
+    with pytest.raises(RuntimeError, match=r'.*'):
         try_auth(token)
 
 
@@ -434,7 +434,7 @@ def test_try_auth_raises_runtime_error_on_smtp_auth(mocker: MockerFixture) -> No
                                                  pop_endpoint='pop.example.com',
                                                  smtp_endpoint='smtp.example.com',
                                                  scope='email'))
-    with pytest.raises(RuntimeError, match='.*'):
+    with pytest.raises(RuntimeError, match=r'.*'):
         try_auth(token)
 
 
