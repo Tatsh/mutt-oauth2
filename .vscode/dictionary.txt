@@ -67,6 +67,7 @@ pyright
 pytest
 ripdb
 ryujinx
+sasl
 schemafile
 sdcard
 serverlogs

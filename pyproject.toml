@@ -66,6 +66,7 @@ click = "^8.1.7"
 keyring = "^25.5.0"
 python = ">=3.10,<4"
 requests = "^2.32.3"
+typing-extensions = "^4.13.1"
 
 [tool.poetry.group]
 

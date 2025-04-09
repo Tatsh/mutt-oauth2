@@ -323,9 +323,6 @@ local manifestYaml(value) =
             ],
           },
           {
-            args: [
-              '--no-update',
-            ],
             id: 'poetry-lock',
             stages: [
               'pre-push',
@@ -334,7 +331,6 @@ local manifestYaml(value) =
           {
             args: [
               '--all-extras',
-              '--sync',
               '--with=dev,docs,tests',
             ],
             id: 'poetry-install',
@@ -673,6 +669,7 @@ local manifestYaml(value) =
           click: '^8.1.7',
           keyring: '^25.5.0',
           requests: '^2.32.3',
+          'typing-extensions': '^4.13.1',
         },
         group: {
           dev: {

@@ -30,14 +30,11 @@ repos:
       - id: 'poetry-check'
         stages:
           - 'pre-push'
-      - args:
-          - '--no-update'
-        id: 'poetry-lock'
+      - id: 'poetry-lock'
         stages:
           - 'pre-push'
       - args:
           - '--all-extras'
-          - '--sync'
           - '--with=dev,docs,tests'
         id: 'poetry-install'
     repo: 'https://github.com/python-poetry/poetry'

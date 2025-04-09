@@ -370,7 +370,7 @@ def test_try_auth(mocker: MockerFixture) -> None:
     mock_smtp.assert_called_once_with('smtp.example.com', 587)
 
 
-def test_try_auth_raises_runtimeerror_on_imap_auth(mocker: MockerFixture) -> None:
+def test_try_auth_raises_runtime_error_on_imap_auth(mocker: MockerFixture) -> None:
     mocker.patch('mutt_oauth2.utils.poplib.POP3_SSL')
     mocker.patch('mutt_oauth2.utils.smtplib.SMTP')
     mock_imap = mocker.patch('mutt_oauth2.utils.imaplib.IMAP4_SSL')
@@ -392,7 +392,7 @@ def test_try_auth_raises_runtimeerror_on_imap_auth(mocker: MockerFixture) -> Non
         try_auth(token)
 
 
-def test_try_auth_raises_runtimeerror_on_pop_auth(mocker: MockerFixture) -> None:
+def test_try_auth_raises_runtime_error_on_pop_auth(mocker: MockerFixture) -> None:
     mocker.patch('mutt_oauth2.utils.imaplib.IMAP4_SSL')
     mocker.patch('mutt_oauth2.utils.smtplib.SMTP')
     mock_pop = mocker.patch('mutt_oauth2.utils.poplib.POP3_SSL')
@@ -415,7 +415,7 @@ def test_try_auth_raises_runtimeerror_on_pop_auth(mocker: MockerFixture) -> None
         try_auth(token)
 
 
-def test_try_auth_raises_runtimeerror_on_smtp_auth(mocker: MockerFixture) -> None:
+def test_try_auth_raises_runtime_error_on_smtp_auth(mocker: MockerFixture) -> None:
     mocker.patch('mutt_oauth2.utils.imaplib.IMAP4_SSL')
     mocker.patch('mutt_oauth2.utils.smtplib.SMTP')
     mocker.patch('mutt_oauth2.utils.poplib.POP3_SSL')

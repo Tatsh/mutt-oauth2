@@ -22,13 +22,20 @@ def test_get_handler(mocker: MockerFixture) -> None:
     end_headers = mocker.patch('mutt_oauth2.main.http.server.BaseHTTPRequestHandler.end_headers')
     mocker.patch('mutt_oauth2.main.http.server.BaseHTTPRequestHandler.parse_request')
     mocker.patch('mutt_oauth2.main.http.server.BaseHTTPRequestHandler.handle_one_request')
-    handler = get_handler('auth_code')(mocker.MagicMock(), '', mocker.MagicMock())
-    handler.path = '/'
+    auth_code = None
+
+    def set_auth_code(x: str) -> None:
+        nonlocal auth_code
+        auth_code = x
+
+    handler = get_handler(set_auth_code)(mocker.MagicMock(), '', mocker.MagicMock())
+    handler.path = '/?code=blah'
     handler.request_version = 'HTTP/1.1'
     handler.do_GET()  # type: ignore[attr-defined]
     send_response.assert_called_once_with(200)
     send_header.assert_called_with('Content-type', 'text/html')
     end_headers.assert_called_once()
+    assert auth_code == 'blah'
 
 
 def test_main_no_token_no_authorize(runner: CliRunner, mocker: MockerFixture) -> None:
