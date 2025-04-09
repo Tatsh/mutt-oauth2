@@ -21,13 +21,8 @@ from .registrations import Registration
 
 log = logging.getLogger(__name__)
 
-__all__ = (
-    'OAuth2Error',
-    'SavedToken',
-    'get_localhost_redirect_uri',
-    'log_oauth2_error',
-    'test_auth',
-)
+__all__ = ('OAuth2Error', 'SavedToken', 'get_localhost_redirect_uri', 'log_oauth2_error',
+           'try_auth')
 
 
 class OAuth2Error(Exception):
@@ -66,7 +61,7 @@ class SavedTokenEncoder(json.JSONEncoder):
     def default(self, o: Any) -> Any:
         if isinstance(o, datetime):
             return o.timestamp()
-        return super().default(o)
+        return super().default(o)  # pragma: no cover
 
 
 @dataclass
@@ -109,7 +104,7 @@ class SavedToken:
                           sort_keys=True)
 
     def refresh(self, username: str) -> None:
-        if self.is_access_token_valid():
+        if self.is_access_token_valid():  # pragma: no cover
             return
         r = requests.post(self.registration.token_endpoint,
                           data={
@@ -178,15 +173,18 @@ class SavedToken:
         return data
 
 
-def test_auth(token: SavedToken, *, debug: bool = False) -> None:
+def try_auth(token: SavedToken, *, debug: bool = False) -> None:
     errors = False
     imap_conn = imaplib.IMAP4_SSL(token.registration.imap_endpoint)
     sasl_string = build_sasl_string(token.registration, token.email,
                                     token.registration.imap_endpoint, 993, token.access_token)
-    if debug:
+    if debug:  # pragma: no cover
         imap_conn.debug = 4
     try:
-        imap_conn.authenticate(token.registration.sasl_method, lambda _: sasl_string.encode())
+        imap_conn.authenticate(
+            token.registration.sasl_method,
+            lambda _: sasl_string.encode(),  # pragma: no cover
+        )
         # Microsoft has a bug wherein a mismatch between username and token can still report a
         # successful login... (Try a consumer login with the token from a work/school account.)
         # Fortunately subsequent commands fail with an error. Thus we follow AUTH with another
@@ -194,12 +192,12 @@ def test_auth(token: SavedToken, *, debug: bool = False) -> None:
         imap_conn.list()
         log.info('IMAP authentication succeeded.')
     except imaplib.IMAP4.error:
-        log.exception('IMAP authentication FAILED (does your account allow IMAP?).')
+        log.exception('IMAP authentication failed. Does your account allow IMAP?')
         errors = True
     pop_conn = poplib.POP3_SSL(token.registration.pop_endpoint)
     sasl_string = build_sasl_string(token.registration, token.email,
                                     token.registration.pop_endpoint, 995, token.access_token)
-    if debug:
+    if debug:  # pragma: no cover
         pop_conn.set_debuglevel(2)
     try:
         # poplib doesn't have an auth command taking an authenticator object
@@ -210,7 +208,7 @@ def test_auth(token: SavedToken, *, debug: bool = False) -> None:
             standard_b64encode(sasl_string.encode()).decode())
         log.info('POP authentication succeeded.')
     except poplib.error_proto:
-        log.exception('POP authentication FAILED (does your account allow POP?).')
+        log.exception('POP authentication failed. Does your account allow POP?')
         errors = True
     # SMTP_SSL would be simpler but Microsoft does not answer on port 465.
     smtp_conn = smtplib.SMTP(token.registration.smtp_endpoint, 587)
@@ -219,13 +217,16 @@ def test_auth(token: SavedToken, *, debug: bool = False) -> None:
     smtp_conn.ehlo('test')
     smtp_conn.starttls()
     smtp_conn.ehlo('test')
-    if debug:
+    if debug:  # pragma: no cover
         smtp_conn.set_debuglevel(2)
     try:
-        smtp_conn.auth(token.registration.sasl_method, lambda _=None: sasl_string)
+        smtp_conn.auth(
+            token.registration.sasl_method,
+            lambda _=None: sasl_string,  # pragma: no cover
+        )
         log.info('SMTP authentication succeeded.')
     except smtplib.SMTPAuthenticationError:
-        log.exception('SMTP authentication FAILED.')
+        log.exception('SMTP authentication failed.')
         errors = True
     if errors:
         raise RuntimeError
