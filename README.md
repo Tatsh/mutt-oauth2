@@ -1,5 +1,14 @@
 # OAuth2 script for Mutt
 
+[![QA](https://github.com/Tatsh/mutt_oauth2/actions/workflows/qa.yml/badge.svg)](https://github.com/Tatsh/mutt_oauth2/actions/workflows/qa.yml)
+[![Tests](https://github.com/Tatsh/mutt_oauth2/actions/workflows/tests.yml/badge.svg)](https://github.com/Tatsh/mutt_oauth2/actions/workflows/tests.yml)
+[![Coverage Status](https://coveralls.io/repos/github/Tatsh/mutt_oauth2/badge.svg?branch=master)](https://coveralls.io/github/Tatsh/mutt_oauth2?branch=master)
+[![Documentation Status](https://readthedocs.org/projects/mutt_oauth2/badge/?version=latest)](https://mutt_oauth2.readthedocs.io/en/latest/?badge=latest)
+![PyPI - Version](https://img.shields.io/pypi/v/mutt_oauth2)
+![GitHub tag (with filter)](https://img.shields.io/github/v/tag/Tatsh/mutt_oauth2)
+![GitHub](https://img.shields.io/github/license/Tatsh/mutt_oauth2)
+![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/commits-since/Tatsh/mutt_oauth2/v0.0.2/master)
+
 This is an update of [Alexander Perlis' script](https://github.com/muttmua/mutt/blob/master/contrib/mutt_oauth2.py)
 and conversion to a package. Instead of using GPG for token storage, this package uses Keyring.
 
