@@ -2,10 +2,8 @@ local utils = import 'utils.libjsonnet';
 
 (import 'defaults.libjsonnet') + {
   local top = self,
-
   want_main: true,
 
-  github_username: 'Tatsh',
   authors: [
     {
       'family-names': 'Udvare',
@@ -14,35 +12,26 @@ local utils = import 'utils.libjsonnet';
       name: '%s %s' % [self['given-names'], self['family-names']],
     },
   ],
-  project_name: 'mutt-oauth2',
-  version: '0.0.3',
   description: 'Packaged, maintained version of contributed mutt_oauth2.py script.',
   keywords: ['email', 'gmail', 'mutt', 'outlook'],
+  project_name: 'mutt-oauth2',
+  version: '0.0.3',
 
+  local funding_name = '%s2' % std.asciiLower(self.github_username),
+  github_username: 'Tatsh',
   github+: {
-    funding: {
-      custom: null,
-      github: top.github_username,
-      ko_fi: 'tatsh2',
-      liberapay: 'tatsh2',
-      patreon: 'tatsh2',
+    funding+: {
+      ko_fi: funding_name,
+      liberapay: funding_name,
+      patreon: funding_name,
     },
-    pages_uri: 'https://%s.github.io/%s/' % [std.asciiLower(top.github_username), top.project_name],
-    username: top.github_username,
   },
 
   citation+: {
-    authors: utils.citationAuthors(top.authors),
     'date-released': '2025-04-09',
   },
 
   pyproject+: {
-    project+: {
-      authors: [{ name: x.name, email: x.email } for x in top.authors],
-      name: top.project_name,
-      scripts: { [top.project_name]: '%s.main:main' % top.primary_module },
-      version: top.version,
-    },
     tool+: {
       poetry+: {
         dependencies+: {
@@ -58,8 +47,6 @@ local utils = import 'utils.libjsonnet';
             },
           },
         },
-        include: ['%s-jsonnet' % top.primary_module],
-        packages: [{ include: x } for x in [top.primary_module]],
       },
     },
   },

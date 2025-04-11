@@ -82,7 +82,7 @@ strict_optional = true
 warn_unreachable = true
 
 [tool.poetry]
-include = ["mutt_oauth2-jsonnet"]
+include = []
 
 [tool.poetry.dependencies]
 click = "^8.1.8"
