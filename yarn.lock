@@ -2551,8 +2551,8 @@ __metadata:
   linkType: hard
 
 "pyright@npm:^1.1.398":
-  version: 1.1.398
-  resolution: "pyright@npm:1.1.398"
+  version: 1.1.399
+  resolution: "pyright@npm:1.1.399"
   dependencies:
     fsevents: "npm:~2.3.3"
   dependenciesMeta:
@@ -2561,7 +2561,7 @@ __metadata:
   bin:
     pyright: index.js
     pyright-langserver: langserver.index.js
-  checksum: 10c0/f8cdfc3b7168d28e29e0597472305f0f1a282257e51b5006cbb91199e8cfa20a00a4df17b06f54e67206591b37af07317a7d1e1d1880711bd0d3d84bfba5c4dd
+  checksum: 10c0/e85c14c4d8cb5d63731c81f921395f468a9f9a8b60f4dd815fcd4b5c15664964187b686ff739bb899ea189036418a9b9fbe6229fb1fb14bf50dcc2092a62543e
   languageName: node
   linkType: hard
 

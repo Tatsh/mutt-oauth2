@@ -25,7 +25,7 @@ repos:
       - id: 'fix-byte-order-marker'
       - id: 'mixed-line-ending'
     repo: 'https://github.com/pre-commit/pre-commit-hooks'
-    rev: 'v4.6.0'
+    rev: 'v5.0.0'
   - hooks:
       - id: 'poetry-check'
         stages:
@@ -35,15 +35,15 @@ repos:
           - 'pre-push'
       - args:
           - '--all-extras'
-          - '--with=dev,docs,tests'
+          - '--all-groups'
         id: 'poetry-install'
     repo: 'https://github.com/python-poetry/poetry'
-    rev: '1.8.0'
+    rev: '2.1.2'
   - hooks:
       - id: 'yapf'
         name: 'check Python files are formatted'
     repo: 'https://github.com/google/yapf'
-    rev: 'v0.40.2'
+    rev: 'v0.43.0'
   - hooks:
       - id: 'check-github-actions'
       - id: 'check-github-workflows'
@@ -54,7 +54,11 @@ repos:
         id: 'check-jsonschema'
         name: 'validate package.json'
     repo: 'https://github.com/python-jsonschema/check-jsonschema'
-    rev: '0.28.2'
+    rev: '0.31.3'
+  - hooks:
+      - id: 'validate-cff'
+    repo: 'https://github.com/citation-file-format/cffconvert'
+    rev: 'b6045d7'
   - hooks:
       - entry: 'yarn install --check-cache --immutable'
         files: "^package\\.json$"

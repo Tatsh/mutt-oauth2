@@ -1,3 +1,5 @@
+[tool]
+
 [tool.ruff]
 extend = "../pyproject.toml"
 

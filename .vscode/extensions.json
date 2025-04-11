@@ -5,6 +5,7 @@
     "eeyore.yapf",
     "pascalreitermann93.vscode-yaml-sort",
     "redhat.vscode-xml",
-    "redhat.vscode-yaml"
+    "redhat.vscode-yaml",
+    "samuelcolvin.jinjahtml"
   ]
 }

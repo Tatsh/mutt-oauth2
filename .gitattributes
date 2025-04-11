@@ -1,2 +1,2 @@
 *.lock binary
-/.yarn/**/*.cjs
+/.yarn/**/*.cjs binary

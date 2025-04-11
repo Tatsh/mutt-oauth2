@@ -4,6 +4,7 @@ bdic
 binaryornot
 buildid
 cachetextconv
+cffconvert
 chainstate
 chatlogs
 codeowners
@@ -65,6 +66,7 @@ pylance
 pyproject
 pyright
 pytest
+regen
 ripdb
 ryujinx
 sasl

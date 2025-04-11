@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from datetime import datetime, timedelta, timezone
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 import imaplib
 import json
@@ -15,8 +18,10 @@ from mutt_oauth2.utils import (
     object_hook,
     try_auth,
 )
-from pytest_mock import MockerFixture
 import pytest
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 
 def test_log_oauth2_error(mocker: MockerFixture) -> None:
