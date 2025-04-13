@@ -4,10 +4,10 @@
 [![Tests](https://github.com/Tatsh/mutt-oauth2/actions/workflows/tests.yml/badge.svg)](https://github.com/Tatsh/mutt-oauth2/actions/workflows/tests.yml)
 [![Coverage Status](https://coveralls.io/repos/github/Tatsh/mutt-oauth2/badge.svg?branch=master)](https://coveralls.io/github/Tatsh/mutt-oauth2?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/mutt-oauth2/badge/?version=latest)](https://mutt-oauth2.readthedocs.io/en/latest/?badge=latest)
-![PyPI - Version](https://img.shields.io/pypi/v/mutt-oauth2)
-![GitHub tag (with filter)](https://img.shields.io/github/v/tag/Tatsh/mutt-oauth2)
-![GitHub](https://img.shields.io/github/license/Tatsh/mutt-oauth2)
-![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/commits-since/Tatsh/mutt-oauth2/v0.0.3/master)
+[![PyPI - Version](https://img.shields.io/pypi/v/mutt-oauth2)](https://pypi.org/project/mutt-oauth2/)
+[![GitHub tag (with filter)](https://img.shields.io/github/v/tag/Tatsh/mutt-oauth2)](https://github.com/Tatsh/mutt-oauth2/tags)
+[![License](https://img.shields.io/github/license/Tatsh/mutt-oauth2)](https://github.com/Tatsh/mutt-oauth2/blob/master/LICENSE.txt)
+[![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/commits-since/Tatsh/mutt-oauth2/v0.0.3/master)](https://github.com/Tatsh/mutt-oauth2/compare/v0.0.3...master)
 
 This is an update of [Alexander Perlis' script](https://github.com/muttmua/mutt/blob/master/contrib/mutt_oauth2.py)
 and conversion to a package. Instead of using GPG for token storage, this package uses Keyring.
