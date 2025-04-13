@@ -26,10 +26,11 @@ __all__ = ('OAuth2Error', 'SavedToken', 'get_localhost_redirect_uri', 'log_oauth
 
 
 class OAuth2Error(Exception):
-    pass
+    """Generic OAuth2 error."""
 
 
 def log_oauth2_error(data: dict[str, Any]) -> None:
+    """Log OAuth2 error information."""
     if 'error' in data:
         log.error('Error type: %s', data['error'])
         if 'error_description' in data:
@@ -66,22 +67,44 @@ class SavedTokenEncoder(json.JSONEncoder):
 
 @dataclass
 class SavedToken:
+    """Data class for OAuth2 token information."""
     access_token_expiration: datetime | None
+    """Access token expiration."""
     client_id: str
+    """Client ID."""
     client_secret: str
+    """Client secret."""
     email: str
+    """Email address."""
     registration: Registration
+    """Registration."""
     access_token: str = ''
-    refresh_token: str = ''
-    tenant: str | None = None
+    """
+    Access token.
 
+    :meta hide-value:
+    """
+    refresh_token: str = ''
+    """
+    Refresh token.
+
+    :meta hide-value:
+    """
+    tenant: str | None = None
+    """
+    Tenant ID, if applicable.
+
+    :meta hide-value:
+    """
     @staticmethod
     def from_keyring(username: str) -> SavedToken | None:
+        """Create an instance using the Keyring."""
         if token_data := keyring.get_password(KEYRING_SERVICE_NAME, username):
             return SavedToken(**json.loads(token_data, object_hook=object_hook))
         return None
 
     def update(self, data: dict[str, Any]) -> None:
+        """Update the token."""
         self.access_token = data['access_token']
         self.access_token_expiration = (datetime.now(tz=timezone.utc) +
                                         timedelta(seconds=int(data['expires_in'])))
@@ -89,14 +112,17 @@ class SavedToken:
             self.refresh_token = data['refresh_token']
 
     def persist(self, username: str) -> None:
+        """Persist the token to the Keyring."""
         keyring.set_password(KEYRING_SERVICE_NAME, username, self.as_json())
 
     def is_access_token_valid(self) -> bool:
+        """Check if the access token is valid."""
         if self.access_token_expiration:
             return datetime.now(tz=timezone.utc) < self.access_token_expiration
         return False
 
     def as_json(self, indent: int | None = None) -> str:
+        """Convert the token to JSON."""
         return json.dumps(asdict(self),
                           allow_nan=False,
                           cls=SavedTokenEncoder,
@@ -104,6 +130,7 @@ class SavedToken:
                           sort_keys=True)
 
     def refresh(self, username: str) -> None:
+        """Refresh the access token using the refresh token."""
         if self.is_access_token_valid():  # pragma: no cover
             return
         r = requests.post(self.registration.token_endpoint,
@@ -122,6 +149,7 @@ class SavedToken:
         self.persist(username)
 
     def exchange_auth_for_access(self, auth_code: str, verifier: str, redirect_uri: str) -> Any:
+        """Exchange the authorisation code for an access token."""
         log.debug('Exchanging the authorisation code for an access token.')
         r = requests.post(self.registration.token_endpoint,
                           data={
@@ -141,6 +169,7 @@ class SavedToken:
         return data
 
     def get_device_code(self) -> Any:
+        """Get the device code."""
         r = requests.post(self.registration.device_code_endpoint,
                           data=({
                               'client_id': self.client_id,
@@ -156,6 +185,7 @@ class SavedToken:
         return data
 
     def device_poll(self, device_code: str) -> Any:
+        """Poll the device code endpoint for the access token."""
         r = requests.post(self.registration.token_endpoint,
                           data={
                               'client_id': self.client_id,
@@ -174,6 +204,7 @@ class SavedToken:
 
 
 def try_auth(token: SavedToken, *, debug: bool = False) -> None:
+    """Try to authenticate using passed in token."""
     errors = False
     imap_conn = imaplib.IMAP4_SSL(token.registration.imap_endpoint)
     sasl_string = build_sasl_string(token.registration, token.email,

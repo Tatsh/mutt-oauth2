@@ -5,22 +5,36 @@ __all__ = ('registrations',)
 
 @dataclass
 class Registration:
+    """Generic data class for an OAuth2 provider."""
     authorize_endpoint: str
+    """Authorisation endpoint."""
     device_code_endpoint: str
+    """Device code endpoint."""
     token_endpoint: str
+    """Token endpoint."""
     redirect_uri: str
+    """Redirect URI."""
     imap_endpoint: str
+    """IMAP endpoint."""
     pop_endpoint: str
+    """POP endpoint."""
     smtp_endpoint: str
+    """SMTP endpoint."""
     sasl_method: str
+    """SASL method."""
     scope: str
+    """Scope."""
     tenant: str | None = None
+    """Tenant ID, if applicable."""
 
 
 @dataclass
 class Registrations:
+    """Data class for OAuth2 provider information."""
     google: Registration
+    """Google."""
     microsoft: Registration
+    """Microsoft."""
 
 
 registrations = Registrations(
@@ -46,3 +60,8 @@ registrations = Registrations(
                'https://outlook.office.com/SMTP.Send'),
         tenant='common',
         token_endpoint='https://login.microsoftonline.com/common/oauth2/v2.0/token'))  # noqa: S106
+"""
+Registrations.
+
+:meta hide-value:
+"""

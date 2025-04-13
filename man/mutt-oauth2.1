@@ -1,3 +1,4 @@
+'\" t
 .\" Man page generated from reStructuredText.
 .
 .
@@ -68,6 +69,50 @@ Keyring username.
 .TP
 .B \-v, \-\-verbose
 Enable verbose logging.
+.UNINDENT
+.SH USAGE
+.sp
+Start by calling \fBmutt\-oauth2 \-a\fP\&. Be sure to have your client ID and and client secret available.
+.SS Scopes required
+.TS
+box center;
+l|l.
+T{
+Provider
+T}	T{
+Scopes
+T}
+_
+T{
+Gmail
+T}	T{
+Gmail API
+T}
+_
+T{
+Microsoft
+T}	T{
+offline_access IMAP.AccessAsUser.All POP.AccessAsUser.All SMTP.Send
+T}
+.TE
+.sp
+To support other accounts, use the \fB\-\-username\fP argument with a unique string such as the account
+email address.
+.sp
+Test the script with the \fB\-\-test\fP argument.
+.SS mutt configuration
+.sp
+Add the following to \fBmuttrc\fP:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.EX
+set imap_authenticators=\(dqoauthbearer:xoauth2\(dq
+set imap_oauth_refresh_command=\(dq/path/to/mutt\-oauth2\(dq
+set smtp_authenticators=${imap_authenticators}
+set smtp_oauth_refresh_command=${imap_oauth_refresh_command}
+.EE
+.UNINDENT
 .UNINDENT
 .SH AUTHOR
 Andrew Udvare <audvare@gmail.com>
