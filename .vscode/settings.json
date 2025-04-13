@@ -4,13 +4,24 @@
     "editor.formatOnSaveMode": "file",
     "editor.tabSize": 4
   },
+  "[restructuredtext]": {
+    "editor.defaultFormatter": "lextudio.restructuredtext",
+    "editor.formatOnSaveMode": "file",
+    "editor.tabSize": 3
+  },
   "cSpell.enabled": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnPaste": true,
   "editor.formatOnSave": true,
   "editor.formatOnType": true,
   "editor.insertSpaces": true,
+  "editor.rulers": [100],
   "editor.tabSize": 2,
+  "editor.wordWrapColumn": 100,
   "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
   "python.analysis.autoImportCompletions": true,
   "python.analysis.completeFunctionParens": true,
   "python.analysis.importFormat": "relative",
@@ -27,5 +38,6 @@
   ],
   "python.languageServer": "Pylance",
   "python.testing.pytestArgs": ["tests"],
-  "python.testing.pytestEnabled": true
+  "python.testing.pytestEnabled": true,
+  "yaml.format.printWidth": 100
 }

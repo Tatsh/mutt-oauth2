@@ -117,7 +117,7 @@
     "ruff": "poetry run ruff check",
     "ruff:fix": "poetry run ruff check --fix",
     "test": "poetry run pytest",
-    "test:cov": "yarn pytest --cov . --cov-report html --cov-report term-missing:skip-covered"
+    "test:cov": "yarn test --cov . --cov-report html --cov-report term-missing:skip-covered"
   },
   "version": "0.0.3"
 }

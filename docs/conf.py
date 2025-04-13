@@ -31,7 +31,7 @@ datatables_options = {'paging': 0}
 datatables_version = '1.13.4'
 html_theme = 'sphinx_immaterial'
 html_theme_options = {
-    'edit_uri': '-/blob/main/docs/',
+    'edit_uri': '/tree/master/docs',
     'features': [
         'announce.dismiss', 'content.action.edit', 'content.action.view', 'content.code.copy',
         'content.tabs.link', 'content.tooltips', 'navigation.expand', 'navigation.footer',

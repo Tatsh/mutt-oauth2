@@ -54,16 +54,17 @@ version_provider = "pep621"
 [tool.coverage]
 
 [tool.coverage.report]
-omit = ["conftest.py", "tests.py", "tests/test_*.py"]
+omit = ["conftest.py", "tests.py", "tests/test_*.py", "__main__.py"]
 show_missing = true
 
 [tool.coverage.run]
 branch = true
-omit = ["conftest.py", "tests.py", "tests/test_*.py"]
+omit = ["conftest.py", "tests.py", "tests/test_*.py", "__main__.py"]
 
 [tool.djlint]
 max_line_length = 100
 no_line_after_yaml = true
+preserve_blank_lines = true
 preserve_leading_space = true
 profile = "jinja"
 use_gitignore = true
@@ -82,7 +83,7 @@ strict_optional = true
 warn_unreachable = true
 
 [tool.poetry]
-include = []
+include = ["man"]
 
 [tool.poetry.dependencies]
 click = "^8.1.8"
@@ -97,7 +98,7 @@ typing-extensions = "^4.13.1"
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-commitizen = "^4.4.1"
+commitizen = "^4.5.0"
 djlint = "^1.36.4"
 mypy = ">=1.12,<1.16"
 ruff = "^0.11.2"
@@ -166,7 +167,6 @@ testpaths = ["tests"]
 
 [tool.ruff]
 cache-dir = "~/.cache/ruff"
-extend-exclude = []
 force-exclude = true
 line-length = 100
 namespace-packages = ["docs", "tests"]

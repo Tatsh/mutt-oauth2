@@ -34,7 +34,6 @@ repos:
         stages:
           - 'pre-push'
       - args:
-          - '--all-extras'
           - '--all-groups'
         id: 'poetry-install'
     repo: 'https://github.com/python-poetry/poetry'

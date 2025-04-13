@@ -27,4 +27,4 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Item
 
-[unreleased]: https://github.com/Tatsh/mutt-oauth2/-/compare/v{settings.version}...HEAD
+[unreleased]: https://github.com/Tatsh/mutt-oauth2/-/compare/v0.0.3...HEAD

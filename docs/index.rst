@@ -1,12 +1,12 @@
 mutt-oauth2
-=============================
+===========
 
 Commands
 --------
 
 .. click:: mutt_oauth2.main:main
-  :prog: mutt-oauth2
-  :nested: full
+   :prog: mutt-oauth2
+   :nested: full
 
 .. only:: html
 

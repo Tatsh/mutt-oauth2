@@ -1,36 +1,17 @@
 local utils = import 'utils.libjsonnet';
 
-(import 'defaults.libjsonnet') + {
-  local top = self,
-  want_main: true,
+local utils = import 'utils.libjsonnet';
 
-  authors: [
-    {
-      'family-names': 'Udvare',
-      'given-names': 'Andrew',
-      email: 'audvare@gmail.com',
-      name: '%s %s' % [self['given-names'], self['family-names']],
-    },
-  ],
+(import 'defaults.libjsonnet') + {
+  // Project-specific
   description: 'Packaged, maintained version of contributed mutt_oauth2.py script.',
   keywords: ['email', 'gmail', 'mutt', 'outlook'],
   project_name: 'mutt-oauth2',
   version: '0.0.3',
-
-  local funding_name = '%s2' % std.asciiLower(self.github_username),
-  github_username: 'Tatsh',
-  github+: {
-    funding+: {
-      ko_fi: funding_name,
-      liberapay: funding_name,
-      patreon: funding_name,
-    },
-  },
-
+  want_main: true,
   citation+: {
     'date-released': '2025-04-09',
   },
-
   pyproject+: {
     tool+: {
       poetry+: {
@@ -38,7 +19,6 @@ local utils = import 'utils.libjsonnet';
           click: '^8.1.8',
           keyring: '^25.5.0',
           requests: '^2.32.3',
-          'typing-extensions': '^4.13.1',
         },
         group+: {
           dev+: {
@@ -48,6 +28,24 @@ local utils = import 'utils.libjsonnet';
           },
         },
       },
+    },
+  },
+  // Common
+  authors: [
+    {
+      'family-names': 'Udvare',
+      'given-names': 'Andrew',
+      email: 'audvare@gmail.com',
+      name: '%s %s' % [self['given-names'], self['family-names']],
+    },
+  ],
+  local funding_name = '%s2' % std.asciiLower(self.github_username),
+  github_username: 'Tatsh',
+  github+: {
+    funding+: {
+      ko_fi: funding_name,
+      liberapay: funding_name,
+      patreon: funding_name,
     },
   },
 }
