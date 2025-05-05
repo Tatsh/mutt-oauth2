@@ -30,8 +30,10 @@ lextudio
 libjsonnet
 localhostauth
 modindex
+multiline
 muttrc
 mypy
+noninfringement
 norecursedirs
 numpy
 numpydoc
@@ -49,6 +51,7 @@ regen
 schemafile
 shortcmd
 sphinxcontrib
+sublicense
 tatsh
 testpaths
 toctree
