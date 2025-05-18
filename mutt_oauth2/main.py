@@ -1,5 +1,8 @@
+"""Commands."""
+from __future__ import annotations
+
 from base64 import urlsafe_b64encode
-from collections.abc import Callable
+from typing import TYPE_CHECKING
 from urllib.parse import urlencode
 import contextlib
 import getpass
@@ -16,6 +19,9 @@ import requests
 
 from .registrations import registrations
 from .utils import OAuth2Error, SavedToken, get_localhost_redirect_uri, try_auth
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 __all__ = ('main',)
 
@@ -54,7 +60,7 @@ def main(username: str,
          debug: bool = False,
          test: bool = False,
          verbose: bool = False) -> None:
-    """Obtain and print a valid OAuth2 access token."""
+    """Obtain and print a valid OAuth2 access token."""  # noqa: DOC501
     logging.basicConfig(
         level=logging.DEBUG if debug else logging.INFO if verbose else logging.ERROR)
     token = SavedToken.from_keyring(username)

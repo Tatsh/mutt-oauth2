@@ -1,13 +1,19 @@
-from collections.abc import Callable
-from typing import Any
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
 from unittest.mock import Mock
 
-from click.testing import CliRunner
 from mutt_oauth2.main import get_handler, main
 from mutt_oauth2.utils import OAuth2Error, SavedToken
-from pytest_mock import MockerFixture
+from typing_extensions import Self
 import pytest
 import requests
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from click.testing import CliRunner
+    from pytest_mock import MockerFixture
 
 
 @pytest.fixture
@@ -131,7 +137,7 @@ def test_main_authorize_new_token(runner: CliRunner, mock_saved_token: Mock,
         def handle_request(self) -> None:
             self.callback('code')
 
-        def __enter__(self) -> 'MockHTTPServer':
+        def __enter__(self) -> Self:
             return self
 
         def __exit__(self, *args: object) -> None:
@@ -173,7 +179,7 @@ def test_main_authorize_new_token_exchange_fail(runner: CliRunner, mock_saved_to
         def handle_request(self) -> None:
             self.callback('code')
 
-        def __enter__(self) -> 'MockHTTPServer':
+        def __enter__(self) -> Self:
             return self
 
         def __exit__(self, *args: object) -> None:

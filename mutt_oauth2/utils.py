@@ -1,3 +1,4 @@
+"""Utilities."""
 from __future__ import annotations
 
 from base64 import standard_b64encode
@@ -130,7 +131,13 @@ class SavedToken:
                           sort_keys=True)
 
     def refresh(self, username: str) -> None:
-        """Refresh the access token using the refresh token."""
+        """
+        Refresh the access token using the refresh token.
+
+        Raises
+        ------
+        OAuth2Error
+        """
         if self.is_access_token_valid():  # pragma: no cover
             return
         r = requests.post(self.registration.token_endpoint,
@@ -149,7 +156,13 @@ class SavedToken:
         self.persist(username)
 
     def exchange_auth_for_access(self, auth_code: str, verifier: str, redirect_uri: str) -> Any:
-        """Exchange the authorisation code for an access token."""
+        """
+        Exchange the authorisation code for an access token.
+
+        Raises
+        ------
+        OAuth2Error
+        """
         log.debug('Exchanging the authorisation code for an access token.')
         r = requests.post(self.registration.token_endpoint,
                           data={
@@ -169,7 +182,13 @@ class SavedToken:
         return data
 
     def get_device_code(self) -> Any:
-        """Get the device code."""
+        """
+        Get the device code.
+
+        Raises
+        ------
+        OAuth2Error
+        """
         r = requests.post(self.registration.device_code_endpoint,
                           data=({
                               'client_id': self.client_id,
@@ -185,7 +204,13 @@ class SavedToken:
         return data
 
     def device_poll(self, device_code: str) -> Any:
-        """Poll the device code endpoint for the access token."""
+        """
+        Poll the device code endpoint for the access token.
+
+        Raises
+        ------
+        OAuth2Error
+        """
         r = requests.post(self.registration.token_endpoint,
                           data={
                               'client_id': self.client_id,
@@ -204,7 +229,13 @@ class SavedToken:
 
 
 def try_auth(token: SavedToken, *, debug: bool = False) -> None:
-    """Try to authenticate using passed in token."""
+    """
+    Try to authenticate using passed in token.
+
+    Raises
+    ------
+    RuntimeError
+    """
     errors = False
     imap_conn = imaplib.IMAP4_SSL(token.registration.imap_endpoint)
     sasl_string = build_sasl_string(token.registration, token.email,

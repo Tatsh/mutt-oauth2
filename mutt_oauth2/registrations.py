@@ -1,3 +1,6 @@
+"""Registration information for OAuth2 providers."""
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 __all__ = ('registrations',)

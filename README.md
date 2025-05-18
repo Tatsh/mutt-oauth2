@@ -1,18 +1,30 @@
-# OAuth2 script for Mutt
+# mutt-oauth2
 
-[![QA](https://github.com/Tatsh/mutt-oauth2/actions/workflows/qa.yml/badge.svg)](https://github.com/Tatsh/mutt-oauth2/actions/workflows/qa.yml)
-[![Tests](https://github.com/Tatsh/mutt-oauth2/actions/workflows/tests.yml/badge.svg)](https://github.com/Tatsh/mutt-oauth2/actions/workflows/tests.yml)
-[![Coverage Status](https://coveralls.io/repos/github/Tatsh/mutt-oauth2/badge.svg?branch=master)](https://coveralls.io/github/Tatsh/mutt-oauth2?branch=master)
-[![Documentation Status](https://readthedocs.org/projects/mutt-oauth2/badge/?version=latest)](https://mutt-oauth2.readthedocs.io/en/latest/?badge=latest)
+[![Python versions](https://img.shields.io/pypi/pyversions/mutt-oauth2.svg?color=blue&logo=python&logoColor=white)](https://www.python.org/)
 [![PyPI - Version](https://img.shields.io/pypi/v/mutt-oauth2)](https://pypi.org/project/mutt-oauth2/)
 [![GitHub tag (with filter)](https://img.shields.io/github/v/tag/Tatsh/mutt-oauth2)](https://github.com/Tatsh/mutt-oauth2/tags)
 [![License](https://img.shields.io/github/license/Tatsh/mutt-oauth2)](https://github.com/Tatsh/mutt-oauth2/blob/master/LICENSE.txt)
 [![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/commits-since/Tatsh/mutt-oauth2/v0.0.3/master)](https://github.com/Tatsh/mutt-oauth2/compare/v0.0.3...master)
+[![QA](https://github.com/Tatsh/mutt-oauth2/actions/workflows/qa.yml/badge.svg)](https://github.com/Tatsh/mutt-oauth2/actions/workflows/qa.yml)
+[![Tests](https://github.com/Tatsh/mutt-oauth2/actions/workflows/tests.yml/badge.svg)](https://github.com/Tatsh/mutt-oauth2/actions/workflows/tests.yml)
+[![Coverage Status](https://coveralls.io/repos/github/Tatsh/mutt-oauth2/badge.svg?branch=master)](https://coveralls.io/github/Tatsh/mutt-oauth2?branch=master)
+[![Documentation Status](https://readthedocs.org/projects/mutt-oauth2/badge/?version=latest)](https://mutt-oauth2.readthedocs.org/?badge=latest)
+[![mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+[![pydocstyle](https://img.shields.io/badge/pydocstyle-enabled-AD4CD3)](http://www.pydocstyle.org/en/stable/)
+[![pytest](https://img.shields.io/badge/pytest-zz?logo=Pytest&labelColor=black&color=black)](https://docs.pytest.org/en/stable/)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Downloads](https://static.pepy.tech/badge/mutt-oauth2/month)](https://pepy.tech/project/mutt-oauth2)
+[![Stargazers](https://img.shields.io/github/stars/Tatsh/mutt-oauth2?logo=github&style=flat)](https://github.com/Tatsh/mutt-oauth2/stargazers)
+
+[![@Tatsh](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fpublic.api.bsky.app%2Fxrpc%2Fapp.bsky.actor.getProfile%2F%3Factor%3Ddid%3Aplc%3Auq42idtvuccnmtl57nsucz72%26query%3D%24.followersCount%26style%3Dsocial%26logo%3Dbluesky%26label%3DFollow%2520%40Tatsh&query=%24.followersCount&style=social&logo=bluesky&label=Follow%20%40Tatsh)](https://bsky.app/profile/Tatsh.bsky.social)
 
 This is an update of [Alexander Perlis' script](https://github.com/muttmua/mutt/blob/master/contrib/mutt_oauth2.py)
 and conversion to a package. Instead of using GPG for token storage, this package uses Keyring.
 
 ## Installation
+
+### Pip
 
 ```shell
 pip install mutt-oauth2
