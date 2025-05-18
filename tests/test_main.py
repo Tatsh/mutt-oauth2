@@ -1,3 +1,5 @@
+from collections.abc import Callable
+from typing import Any
 from unittest.mock import Mock
 
 from click.testing import CliRunner
@@ -5,6 +7,7 @@ from mutt_oauth2.main import get_handler, main
 from mutt_oauth2.utils import OAuth2Error, SavedToken
 from pytest_mock import MockerFixture
 import pytest
+import requests
 
 
 @pytest.fixture
@@ -63,14 +66,13 @@ def test_main_with_token_refresh_failure(runner: CliRunner, mock_saved_token: Mo
     assert 'Caught error attempting refresh.' in result.output
 
 
-def test_main_authorize_new_token(runner: CliRunner, mock_saved_token: Mock,
-                                  mocker: MockerFixture) -> None:
+def test_main_authorize_new_token_no_auth_code(runner: CliRunner, mock_saved_token: Mock,
+                                               mocker: MockerFixture) -> None:
     mocker.patch('mutt_oauth2.main.SavedToken.from_keyring', return_value=None)
-    mocker.patch('click.prompt',
-                 side_effect=[
-                     'auth_code', 'google', 'test@example.com', 'client_id', 'client_secret',
-                     'auth_code'
-                 ])
+    mocker.patch(
+        'click.prompt',
+        side_effect=['google', 'test@example.com', 'client_id', 'client_secret', 'auth_code'])
+    mocker.patch('mutt_oauth2.main.http.server.HTTPServer')
     mocker.patch('mutt_oauth2.main.get_localhost_redirect_uri',
                  return_value=(8080, 'http://localhost:8080/'))
     mocker.patch('mutt_oauth2.main.SavedToken.exchange_auth_for_access',
@@ -80,54 +82,15 @@ def test_main_authorize_new_token(runner: CliRunner, mock_saved_token: Mock,
                  })
     mocker.patch.object(SavedToken, 'persist')
     result = runner.invoke(main, ('--authorize',))
-    assert result.exit_code == 0
-    assert 'new_token' in result.output
-
-
-def test_main_device_code_flow(runner: CliRunner, mock_saved_token: Mock,
-                               mocker: MockerFixture) -> None:
-    mocker.patch('mutt_oauth2.main.SavedToken.from_keyring', return_value=None)
-    mocker.patch(
-        'click.prompt',
-        side_effect=['devicecode', 'google', 'test@example.com', 'client_id', 'client_secret'])
-    mocker.patch('mutt_oauth2.main.time.sleep')
-    mocker.patch('mutt_oauth2.main.SavedToken.get_device_code',
-                 return_value={
-                     'message': 'Visit this URL',
-                     'device_code': 'device_code',
-                     'interval': 1
-                 })
-    mocker.patch('mutt_oauth2.main.SavedToken.device_poll',
-                 return_value={
-                     'access_token': 'new_token',
-                     'expires_in': 3600,
-                     'interval': 1
-                 })
-    mocker.patch.object(SavedToken, 'persist')
-    result = runner.invoke(main, ('--authorize',))
-    assert result.exit_code == 0
-    assert 'new_token' in result.output
-
-
-def test_main_invalid_flow(runner: CliRunner, mock_saved_token: Mock,
-                           mocker: MockerFixture) -> None:
-    mocker.patch('mutt_oauth2.main.SavedToken.from_keyring', return_value=None)
-    mocker.patch('click.prompt',
-                 side_effect=['ffff', 'google', 'test@example.com', 'client_id', 'client_secret'])
-    mocker.patch.object(SavedToken, 'persist')
-    result = runner.invoke(main, ('--authorize',))
-    assert result.exit_code != 0
+    assert result.exit_code == 1
 
 
 def test_main_localhost_flow_empty(runner: CliRunner, mock_saved_token: Mock,
                                    mocker: MockerFixture) -> None:
     mocker.patch('mutt_oauth2.main.SavedToken.from_keyring', return_value=None)
-    mocker.patch('click.prompt',
-                 side_effect=[
-                     'localhostauth_code', 'google', 'test@example.com', 'client_id',
-                     'client_secret'
-                 ])
-    mocker.patch('mutt_oauth2.main.time.sleep')
+    mocker.patch(
+        'click.prompt',
+        side_effect=['microsoft', 'test@example.com', 'client_id', 'client_secret', 'tenant'])
     mocker.patch('mutt_oauth2.main.SavedToken.get_device_code',
                  return_value={
                      'message': 'Visit this URL',
@@ -148,82 +111,85 @@ def test_main_localhost_flow_empty(runner: CliRunner, mock_saved_token: Mock,
     assert 'Did not obtain an authorisation code.' in result.output
 
 
-def test_main_device_code_flow_error(runner: CliRunner, mock_saved_token: Mock,
-                                     mocker: MockerFixture) -> None:
+def test_main_authorize_new_token(runner: CliRunner, mock_saved_token: Mock,
+                                  mocker: MockerFixture) -> None:
     mocker.patch('mutt_oauth2.main.SavedToken.from_keyring', return_value=None)
-    mocker.patch('mutt_oauth2.main.time.sleep')
     mocker.patch(
         'click.prompt',
-        side_effect=['devicecode', 'google', 'test@example.com', 'client_id', 'client_secret'])
+        side_effect=['microsoft', 'test@example.com', 'client_id', 'client_secret', 'tenant'])
     mocker.patch('mutt_oauth2.main.SavedToken.get_device_code',
                  return_value={
                      'message': 'Visit this URL',
                      'device_code': 'device_code',
                      'interval': 1
                  })
-    mocker.patch('mutt_oauth2.main.SavedToken.device_poll',
-                 return_value={'error': 'authorization_declined'})
-    result = runner.invoke(main, ('--authorize',))
-    assert result.exit_code == 1
-    assert 'User declined authorisation.' in result.output
 
+    class MockHTTPServer:
+        def __init__(self, _: Any, callback: Callable[..., Any]) -> None:
+            self.callback = callback
 
-def test_main_device_code_flow_expired(runner: CliRunner, mock_saved_token: Mock,
-                                       mocker: MockerFixture) -> None:
-    mocker.patch('mutt_oauth2.main.SavedToken.from_keyring', return_value=None)
-    mocker.patch('mutt_oauth2.main.time.sleep')
-    mocker.patch(
-        'click.prompt',
-        side_effect=['devicecode', 'google', 'test@example.com', 'client_id', 'client_secret'])
-    mocker.patch('mutt_oauth2.main.SavedToken.get_device_code',
-                 return_value={
-                     'message': 'Visit this URL',
-                     'device_code': 'device_code',
-                     'interval': 1
-                 })
-    mocker.patch('mutt_oauth2.main.SavedToken.device_poll', return_value={'error': 'expired_token'})
-    result = runner.invoke(main, ('--authorize',))
-    assert result.exit_code == 1
-    assert 'Too much time has elapsed.' in result.output
+        def handle_request(self) -> None:
+            self.callback('code')
 
+        def __enter__(self) -> 'MockHTTPServer':
+            return self
 
-def test_main_device_code_flow_authorization_pending(runner: CliRunner, mock_saved_token: Mock,
-                                                     mocker: MockerFixture) -> None:
-    mocker.patch('mutt_oauth2.main.SavedToken.from_keyring', return_value=None)
-    mocker.patch('mutt_oauth2.main.time.sleep')
-    mocker.patch(
-        'click.prompt',
-        side_effect=['devicecode', 'google', 'test@example.com', 'client_id', 'client_secret'])
-    mocker.patch('mutt_oauth2.main.SavedToken.get_device_code',
-                 return_value={
-                     'message': 'Visit this URL',
-                     'device_code': 'device_code',
-                     'interval': 1
-                 })
+        def __exit__(self, *args: object) -> None:
+            pass
+
+    mocker.patch('mutt_oauth2.main.get_handler', lambda x: x)
+    mocker.patch('mutt_oauth2.main.http.server.HTTPServer', MockHTTPServer)
+    mocker.patch('mutt_oauth2.main.get_localhost_redirect_uri', return_value=(8080, ''))
     mocker.patch('mutt_oauth2.main.SavedToken.device_poll',
                  return_value={
-                     'error': 'authorization_pending',
-                     'message': 'Authorisation pending.'
+                     'access_token': 'new_token',
+                     'expires_in': 3600,
+                     'interval': 1
                  })
+    mocker.patch('mutt_oauth2.main.SavedToken.exchange_auth_for_access')
+    mocker.patch('mutt_oauth2.main.SavedToken.persist')
+    mocker.patch('mutt_oauth2.main.SavedToken.as_json')
     result = runner.invoke(main, ('--authorize',))
-    assert result.exit_code == 1
-    assert 'Authorisation pending.' in result.output
+    assert result.exit_code == 0
 
 
-def test_main_device_code_flow_other_error(runner: CliRunner, mock_saved_token: Mock,
-                                           mocker: MockerFixture) -> None:
+def test_main_authorize_new_token_exchange_fail(runner: CliRunner, mock_saved_token: Mock,
+                                                mocker: MockerFixture) -> None:
     mocker.patch('mutt_oauth2.main.SavedToken.from_keyring', return_value=None)
-    mocker.patch('mutt_oauth2.main.time.sleep')
     mocker.patch(
         'click.prompt',
-        side_effect=['devicecode', 'google', 'test@example.com', 'client_id', 'client_secret'])
+        side_effect=['microsoft', 'test@example.com', 'client_id', 'client_secret', 'tenant'])
     mocker.patch('mutt_oauth2.main.SavedToken.get_device_code',
                  return_value={
                      'message': 'Visit this URL',
                      'device_code': 'device_code',
                      'interval': 1
                  })
-    mocker.patch('mutt_oauth2.main.SavedToken.device_poll', return_value={'error': 'other'})
+
+    class MockHTTPServer:
+        def __init__(self, _: Any, callback: Callable[..., Any]) -> None:
+            self.callback = callback
+
+        def handle_request(self) -> None:
+            self.callback('code')
+
+        def __enter__(self) -> 'MockHTTPServer':
+            return self
+
+        def __exit__(self, *args: object) -> None:
+            pass
+
+    mocker.patch('mutt_oauth2.main.get_handler', lambda x: x)
+    mocker.patch('mutt_oauth2.main.http.server.HTTPServer', MockHTTPServer)
+    mocker.patch('mutt_oauth2.main.get_localhost_redirect_uri', return_value=(8080, ''))
+    mocker.patch('mutt_oauth2.main.SavedToken.device_poll',
+                 return_value={
+                     'access_token': 'new_token',
+                     'expires_in': 3600,
+                     'interval': 1
+                 })
+    mocker.patch('mutt_oauth2.main.SavedToken.exchange_auth_for_access',
+                 side_effect=requests.HTTPError)
     result = runner.invoke(main, ('--authorize',))
     assert result.exit_code == 1
 

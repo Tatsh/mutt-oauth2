@@ -154,12 +154,12 @@ class SavedToken:
         r = requests.post(self.registration.token_endpoint,
                           data={
                               'client_id': self.client_id,
-                              'redirect_uri': redirect_uri,
-                              'scope': self.registration.scope,
                               'client_secret': self.client_secret,
                               'code': auth_code,
                               'code_verifier': verifier,
-                              'grant_type': 'authorization_code'
+                              'grant_type': 'authorization_code',
+                              'redirect_uri': redirect_uri,
+                              'scope': self.registration.scope
                           },
                           timeout=15)
         r.raise_for_status()

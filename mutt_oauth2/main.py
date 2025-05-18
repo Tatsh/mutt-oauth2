@@ -1,6 +1,5 @@
 from base64 import urlsafe_b64encode
 from collections.abc import Callable
-from typing import Literal
 from urllib.parse import urlencode
 import contextlib
 import getpass
@@ -9,7 +8,6 @@ import http
 import http.server
 import logging
 import secrets
-import time
 import urllib
 import urllib.parse
 
@@ -64,11 +62,6 @@ def main(username: str,
         if not authorize or test:
             click.echo('You must run this command with --authorize at least once.', err=True)
             raise click.exceptions.Exit(1)
-        auth_flow: Literal['auth_code', 'localhostauth_code', 'devicecode'] = click.prompt(
-            'Preferred OAuth2 flow',
-            default='auth_code',
-            show_choices=True,
-            type=click.Choice(['auth_code', 'localhostauth_code', 'devicecode']))
         token = SavedToken(access_token_expiration=None,
                            registration=getattr(
                                registrations,
@@ -81,76 +74,42 @@ def main(username: str,
         log.debug('Settings thus far: %s', token.as_json(indent=2))
         if token.registration.tenant is not None:  # pragma: no cover
             token.tenant = click.prompt('Tenant', default=token.registration.tenant)
-        if auth_flow in {'auth_code', 'localhostauth_code'}:
-            verifier = secrets.token_urlsafe(90)
-            challenge = urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest())[:-1]
-            redirect_uri = token.registration.redirect_uri
-            listen_port = None
-            if auth_flow == 'localhostauth_code':  # pragma: no cover
-                listen_port, redirect_uri = get_localhost_redirect_uri()
-            base_params = {
-                'client_id': token.client_id,
-                'login_hint': token.email,
-                'response_type': 'code',
-                'redirect_uri': redirect_uri,
-                'code_challenge': challenge,
-                'code_challenge_method': 'S256',
-                'scope': token.registration.scope
-            }
-            log.debug('Parameters: %s', base_params)
-            if token.tenant:  # pragma: no cover
-                base_params['tenant'] = token.tenant
-            click.echo(token.registration.authorize_endpoint +
-                       f'?{urlencode(base_params, quote_via=urllib.parse.quote)}')
-            auth_code = ''
-            if auth_flow == 'auth_code':
-                auth_code = click.prompt(
-                    'Visit displayed URL to retrieve authorization code. Enter '
-                    'code from server (might be in browser address bar)')
-            else:  # pragma: no cover
-                click.echo('Visit displayed URL to authorize this application. Waiting...')
-                assert listen_port is not None
+        verifier = secrets.token_urlsafe(90)
+        challenge = urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest())[:-1]
+        redirect_uri = token.registration.redirect_uri
+        listen_port, redirect_uri = get_localhost_redirect_uri()
+        base_params = {
+            'client_id': token.client_id,
+            'login_hint': token.email,
+            'response_type': 'code',
+            'redirect_uri': redirect_uri,
+            'code_challenge': challenge,
+            'code_challenge_method': 'S256',
+            'scope': token.registration.scope
+        }
+        log.debug('Parameters: %s', base_params)
+        if token.tenant:
+            base_params['tenant'] = token.tenant
+        click.echo(token.registration.authorize_endpoint +
+                   f'?{urlencode(base_params, quote_via=urllib.parse.quote)}')
+        auth_code = ''
+        click.echo('Visit displayed URL to authorize this application. Waiting...')
+        assert listen_port is not None
 
-                def set_auth_code(x: str) -> None:
-                    nonlocal auth_code
-                    auth_code = x
+        def set_auth_code(x: str) -> None:
+            nonlocal auth_code
+            auth_code = x
 
-                with (http.server.HTTPServer(('127.0.0.1', listen_port), get_handler(set_auth_code))
-                      as httpd, contextlib.suppress(KeyboardInterrupt)):
-                    httpd.handle_request()
-            if not auth_code:
-                click.echo('Did not obtain an authorisation code.', err=True)
-                raise click.exceptions.Exit(1)
-            try:
-                data = token.exchange_auth_for_access(auth_code, verifier, redirect_uri)
-            except (OAuth2Error, requests.HTTPError) as e:  # pragma: no cover
-                raise click.Abort from e
-        elif auth_flow == 'devicecode':
-            try:
-                data = token.get_device_code()
-            except (OAuth2Error, requests.HTTPError) as e:  # pragma: no cover
-                raise click.Abort from e
-            click.echo(data['message'])
-            click.echo('Polling ...')
-            code = data['device_code']
-            while True:
-                time.sleep(data['interval'])
-                data = token.device_poll(code)
-                if 'error' in data:
-                    match data['error']:
-                        case 'authorization_declined':
-                            click.echo('User declined authorisation.', err=True)
-                        case 'expired_token':
-                            click.echo('Too much time has elapsed.', err=True)
-                        case 'authorization_pending':
-                            click.echo(data['message'], err=True)
-                            if 'error_condition' in data:  # pragma: no cover
-                                click.echo(data['error_condition'], err=True)
-                    raise click.exceptions.Exit(1)
-                break
-        else:
-            msg = 'Invalid auth flow.'
-            raise click.BadParameter(msg, param_hint='auth_flow')
+        with (http.server.HTTPServer(('127.0.0.1', listen_port), get_handler(set_auth_code)) as
+              httpd, contextlib.suppress(KeyboardInterrupt)):
+            httpd.handle_request()
+        if not auth_code:
+            click.echo('Did not obtain an authorisation code.', err=True)
+            raise click.exceptions.Exit(1)
+        try:
+            data = token.exchange_auth_for_access(auth_code, verifier, redirect_uri)
+        except (OAuth2Error, requests.HTTPError) as e:
+            raise click.Abort from e
         token.update(data)
         token.persist(username)
     try:
