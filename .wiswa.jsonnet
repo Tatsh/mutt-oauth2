@@ -7,7 +7,7 @@ local utils = import 'utils.libjsonnet';
   description: 'Packaged, maintained version of contributed mutt_oauth2.py script.',
   keywords: ['email', 'gmail', 'mutt', 'outlook'],
   project_name: 'mutt-oauth2',
-  version: '0.1.0',
+  version: '0.1.1',
   want_main: true,
   citation+: {
     'date-released': '2025-04-09',
