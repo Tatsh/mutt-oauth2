@@ -76,7 +76,7 @@ def main(username: str,
                                             type=click.Choice(['google', 'microsoft']))),
                            email=click.prompt('Account e-mail address'),
                            client_id=click.prompt('Client ID'),
-                           client_secret=click.prompt('Client secret'))
+                           client_secret=click.prompt('Client secret', default='') or None)
         log.debug('Settings thus far: %s', token.as_json(indent=2))
         if token.registration.tenant is not None:  # pragma: no cover
             token.tenant = click.prompt('Tenant', default=token.registration.tenant)

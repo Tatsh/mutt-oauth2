@@ -73,8 +73,8 @@ class SavedToken:
     """Access token expiration."""
     client_id: str
     """Client ID."""
-    client_secret: str
-    """Client secret."""
+    client_secret: str | None
+    """Client secret, if applicable."""
     email: str
     """Email address."""
     registration: Registration
@@ -143,10 +143,11 @@ class SavedToken:
         r = requests.post(self.registration.token_endpoint,
                           data={
                               'client_id': self.client_id,
-                              'client_secret': self.client_secret,
                               'grant_type': 'refresh_token',
                               'refresh_token': self.refresh_token
-                          },
+                          } | ({
+                              'client_secret': self.client_secret
+                          } if self.client_secret is not None else {}),
                           timeout=15)
         r.raise_for_status()
         if (data := r.json()) and 'error' in data:
@@ -167,13 +168,14 @@ class SavedToken:
         r = requests.post(self.registration.token_endpoint,
                           data={
                               'client_id': self.client_id,
-                              'client_secret': self.client_secret,
                               'code': auth_code,
                               'code_verifier': verifier,
                               'grant_type': 'authorization_code',
                               'redirect_uri': redirect_uri,
                               'scope': self.registration.scope
-                          },
+                          } | ({
+                              'client_secret': self.client_secret
+                          } if self.client_secret is not None else {}),
                           timeout=15)
         r.raise_for_status()
         if (data := r.json()) and 'error' in data:
@@ -215,11 +217,12 @@ class SavedToken:
                           data={
                               'client_id': self.client_id,
                               'grant_type': 'urn:ietf:params:oauth:grant-type:device_code',
-                              'client_secret': self.client_secret,
                               'device_code': device_code
                           } | ({
                               'tenant': self.tenant
-                          } if self.tenant else {}),
+                          } if self.tenant else {}) | ({
+                              'client_secret': self.client_secret
+                          } if self.client_secret is not None else {}),
                           timeout=15)
         r.raise_for_status()
         if (data := r.json()) and 'error' in data:
