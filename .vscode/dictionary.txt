@@ -49,10 +49,12 @@ regen
 rstcheck
 schemafile
 sdist
+secretless
 shortcmd
 sphinxcontrib
 tatsh
 testpaths
+tharvik
 toctree
 tryfirst
 udvare
