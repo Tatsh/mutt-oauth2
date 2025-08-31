@@ -14,6 +14,7 @@ import secrets
 import urllib
 import urllib.parse
 
+from bascom import setup_logging
 import click
 import requests
 
@@ -53,16 +54,17 @@ def get_handler(
 @click.option('-d', '--debug', help='Enable debug logging.', is_flag=True)
 @click.option('-t', '--test', help='Test authentication.', is_flag=True)
 @click.option('-u', '--username', help='Keyring username.', default=getpass.getuser())
-@click.option('-v', '--verbose', help='Enable verbose logging.', is_flag=True)
 def main(username: str,
          *,
          authorize: bool = False,
          debug: bool = False,
-         test: bool = False,
-         verbose: bool = False) -> None:
+         test: bool = False) -> None:
     """Obtain and print a valid OAuth2 access token."""  # noqa: DOC501
-    logging.basicConfig(
-        level=logging.DEBUG if debug else logging.INFO if verbose else logging.ERROR)
+    setup_logging(debug=debug,
+                  loggers={'mutt_oauth2': {
+                      'handlers': ('console',),
+                      'propagate': False
+                  }})
     token = SavedToken.from_keyring(username)
     if not token:
         if not authorize or test:

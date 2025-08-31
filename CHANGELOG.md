@@ -9,6 +9,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Removed
+
+- `--verbose`/`-v` parameter removed.
+
 ## [0.1.1]
 
 ### Added

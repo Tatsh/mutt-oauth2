@@ -44,7 +44,6 @@ Options:
   -d, --debug          Enable debug logging.
   -t, --test           Test authentication.
   -u, --username TEXT  Keyring username.
-  -v, --verbose        Enable verbose logging.
   -h, --help           Show this message and exit.
 ```
 

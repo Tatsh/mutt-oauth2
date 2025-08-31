@@ -9,8 +9,8 @@ local utils = import 'utils.libjsonnet';
   project_name: 'mutt-oauth2',
   version: '0.1.1',
   want_main: true,
-  citation+: {
-    'date-released': '2025-04-09',
+  copilot: {
+    intro: 'mutt-oauth2 is a script that helps users authenticate their email accounts using OAuth2 in the Mutt email client.',
   },
   pyproject+: {
     tool+: {
