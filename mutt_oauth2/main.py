@@ -7,11 +7,9 @@ from urllib.parse import urlencode
 import contextlib
 import getpass
 import hashlib
-import http
 import http.server
 import logging
 import secrets
-import urllib
 import urllib.parse
 
 from bascom import setup_logging
