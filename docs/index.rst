@@ -19,8 +19,8 @@ mutt-oauth2
       :target: https://github.com/Tatsh/mutt-oauth2/blob/master/LICENSE.txt
       :alt: License
 
-   .. image:: https://img.shields.io/github/commits-since/Tatsh/mutt-oauth2/v0.1.1/master
-      :target: https://github.com/Tatsh/mutt-oauth2/compare/v0.1.1...master
+   .. image:: https://img.shields.io/github/commits-since/Tatsh/mutt-oauth2/v0.1.2/master
+      :target: https://github.com/Tatsh/mutt-oauth2/compare/v0.1.2...master
       :alt: GitHub commits since latest release (by SemVer including pre-releases)
 
    .. image:: https://github.com/Tatsh/mutt-oauth2/actions/workflows/codeql.yml/badge.svg

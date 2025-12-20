@@ -4,7 +4,7 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/mutt-oauth2)](https://pypi.org/project/mutt-oauth2/)
 [![GitHub tag (with filter)](https://img.shields.io/github/v/tag/Tatsh/mutt-oauth2)](https://github.com/Tatsh/mutt-oauth2/tags)
 [![License](https://img.shields.io/github/license/Tatsh/mutt-oauth2)](https://github.com/Tatsh/mutt-oauth2/blob/master/LICENSE.txt)
-[![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/commits-since/Tatsh/mutt-oauth2/v0.1.1/master)](https://github.com/Tatsh/mutt-oauth2/compare/v0.1.1...master)
+[![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/commits-since/Tatsh/mutt-oauth2/v0.1.2/master)](https://github.com/Tatsh/mutt-oauth2/compare/v0.1.2...master)
 [![CodeQL](https://github.com/Tatsh/mutt-oauth2/actions/workflows/codeql.yml/badge.svg)](https://github.com/Tatsh/mutt-oauth2/actions/workflows/codeql.yml)
 [![QA](https://github.com/Tatsh/mutt-oauth2/actions/workflows/qa.yml/badge.svg)](https://github.com/Tatsh/mutt-oauth2/actions/workflows/qa.yml)
 [![Tests](https://github.com/Tatsh/mutt-oauth2/actions/workflows/tests.yml/badge.svg)](https://github.com/Tatsh/mutt-oauth2/actions/workflows/tests.yml)

@@ -20,7 +20,7 @@ keywords = ["email", "gmail", "mutt", "outlook"]
 license = "MIT"
 name = "mutt-oauth2"
 readme = "README.md"
-version = "0.1.1"
+version = "0.1.2"
 
 [[project.authors]]
 email = "audvare@gmail.com"
