@@ -9,6 +9,7 @@ local utils = import 'utils.libjsonnet';
   copilot+: {
     intro: 'mutt-oauth2 is a script that helps users authenticate their email accounts using OAuth2 in the Mutt email client.',
   },
+  security_policy_supported_versions: { '0.1.x': ':white_check_mark:' },
   pyproject+: {
     tool+: {
       poetry+: {

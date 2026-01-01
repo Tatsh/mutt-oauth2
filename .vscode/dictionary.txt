@@ -28,7 +28,6 @@ fontawesome
 foxundermoon
 genindex
 globaltoc
-hoverxref
 htmlcov
 intersphinx
 isort
@@ -41,6 +40,7 @@ lextudio
 libera
 libjsonnet
 linters
+manylinux
 modindex
 muttrc
 mypy
