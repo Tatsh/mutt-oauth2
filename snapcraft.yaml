@@ -1,0 +1,24 @@
+apps:
+  mutt-oauth2:
+    command: 'bin/mutt-oauth2'
+    plugs:
+      - 'home'
+      - 'network'
+      - 'network-bind'
+base: 'core24'
+confinement: 'strict'
+description: 'Packaged, maintained version of contributed mutt_oauth2.py script.'
+grade: 'stable'
+name: 'mutt-oauth2'
+parts:
+  mutt-oauth2:
+    plugin: 'poetry'
+    source: '.'
+    stage-packages: []
+platforms:
+  amd64:
+    build-on: 'amd64'
+  arm64:
+    build-on: 'arm64'
+summary: 'Packaged, maintained version of contributed mutt_oauth2.py script.'
+version: '0.1.2'
