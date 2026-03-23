@@ -7,12 +7,19 @@ apps:
       - 'network-bind'
 base: 'core24'
 confinement: 'strict'
+contact: 'https://github.com/Tatsh/mutt-oauth2/issues'
 description: 'Packaged, maintained version of contributed mutt_oauth2.py script.'
+donation: 'https://buymeacoffee.com/Tatsh'
 grade: 'stable'
+issues: 'https://github.com/Tatsh/mutt-oauth2/issues'
+license: 'MIT'
 name: 'mutt-oauth2'
 parts:
   mutt-oauth2:
-    plugin: 'poetry'
+    build-packages: []
+    plugin: 'python'
+    python-packages:
+      - '.'
     source: '.'
     stage-packages: []
 platforms:
@@ -20,5 +27,8 @@ platforms:
     build-on: 'amd64'
   arm64:
     build-on: 'arm64'
+source-code: 'https://github.com/Tatsh/mutt-oauth2'
 summary: 'Packaged, maintained version of contributed mutt_oauth2.py script.'
+title: 'mutt-oauth2'
 version: '0.1.2'
+website: 'https://tatsh.github.io/mutt-oauth2/'
