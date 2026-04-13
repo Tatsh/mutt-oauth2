@@ -4,7 +4,7 @@ from __future__ import annotations
 from base64 import standard_b64encode
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from typing import Any, Protocol, cast
 import contextlib
 import imaplib
 import json
@@ -21,6 +21,12 @@ from .constants import KEYRING_SERVICE_NAME
 from .registrations import Registration
 
 log = logging.getLogger(__name__)
+
+
+class _Pop3Shortcmd(Protocol):
+    def _shortcmd(self, line: str) -> bytes:
+        ...
+
 
 __all__ = ('OAuth2Error', 'SavedToken', 'get_localhost_redirect_uri', 'log_oauth2_error',
            'try_auth')
@@ -99,7 +105,19 @@ class SavedToken:
     """
     @staticmethod
     def from_keyring(username: str) -> SavedToken | None:
-        """Create an instance using the Keyring."""
+        """
+        Create an instance using the Keyring.
+
+        Parameters
+        ----------
+        username : str
+            Keyring username.
+
+        Returns
+        -------
+        SavedToken or None
+            The saved token if present, otherwise None.
+        """
         if token_data := keyring.get_password(KEYRING_SERVICE_NAME, username):
             return SavedToken(**json.loads(token_data, object_hook=object_hook))
         return None
@@ -117,13 +135,32 @@ class SavedToken:
         keyring.set_password(KEYRING_SERVICE_NAME, username, self.as_json())
 
     def is_access_token_valid(self) -> bool:
-        """Check if the access token is valid."""
+        """
+        Check if the access token is valid.
+
+        Returns
+        -------
+        bool
+            True if the access token is still valid.
+        """
         if self.access_token_expiration:
             return datetime.now(tz=timezone.utc) < self.access_token_expiration
         return False
 
     def as_json(self, indent: int | None = None) -> str:
-        """Convert the token to JSON."""
+        """
+        Convert the token to JSON.
+
+        Parameters
+        ----------
+        indent : int or None
+            Indentation width for pretty-printing, or None for compact output.
+
+        Returns
+        -------
+        str
+            JSON representation of the token.
+        """
         return json.dumps(asdict(self),
                           allow_nan=False,
                           cls=SavedTokenEncoder,
@@ -160,9 +197,24 @@ class SavedToken:
         """
         Exchange the authorisation code for an access token.
 
+        Parameters
+        ----------
+        auth_code : str
+            Authorisation code from the redirect.
+        verifier : str
+            PKCE code verifier.
+        redirect_uri : str
+            Redirect URI used in the authorisation request.
+
+        Returns
+        -------
+        dict
+            Token response data from the authorisation server.
+
         Raises
         ------
         OAuth2Error
+            If the token exchange fails.
         """
         log.debug('Exchanging the authorisation code for an access token.')
         r = requests.post(self.registration.token_endpoint,
@@ -187,9 +239,15 @@ class SavedToken:
         """
         Get the device code.
 
+        Returns
+        -------
+        dict
+            Device authorisation response from the server.
+
         Raises
         ------
         OAuth2Error
+            If the device code request fails.
         """
         r = requests.post(self.registration.device_code_endpoint,
                           data=({
@@ -209,9 +267,20 @@ class SavedToken:
         """
         Poll the device code endpoint for the access token.
 
+        Parameters
+        ----------
+        device_code : str
+            Device code from :py:meth:`get_device_code`.
+
+        Returns
+        -------
+        dict
+            Token response, or an error payload while authorisation is pending.
+
         Raises
         ------
         OAuth2Error
+            If polling fails with a terminal error.
         """
         r = requests.post(self.registration.token_endpoint,
                           data={
@@ -267,9 +336,10 @@ def try_auth(token: SavedToken, *, debug: bool = False) -> None:
     try:
         # poplib doesn't have an auth command taking an authenticator object
         # Microsoft requires a two-line SASL for POP
-        pop_conn._shortcmd(  # type: ignore[attr-defined] # noqa: SLF001
+        pop_via_shortcmd = cast('_Pop3Shortcmd', pop_conn)
+        pop_via_shortcmd._shortcmd(  # noqa: SLF001
             f'AUTH {token.registration.sasl_method}')
-        pop_conn._shortcmd(  # type: ignore[attr-defined] # noqa: SLF001
+        pop_via_shortcmd._shortcmd(  # noqa: SLF001
             standard_b64encode(sasl_string.encode()).decode())
         log.info('POP authentication succeeded.')
     except poplib.error_proto:
@@ -298,7 +368,14 @@ def try_auth(token: SavedToken, *, debug: bool = False) -> None:
 
 
 def get_localhost_redirect_uri() -> tuple[int, str]:
-    """Find an available port and return a localhost URI."""
+    """
+    Find an available port and return a localhost URI.
+
+    Returns
+    -------
+    tuple[int, str]
+        The listening port and matching ``http://localhost:{port}/`` URI.
+    """
     s = socket.socket()
     s.bind(('127.0.0.1', 0))
     listen_port = s.getsockname()[1]

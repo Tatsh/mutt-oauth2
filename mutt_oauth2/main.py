@@ -100,7 +100,6 @@ def main(username: str,
                    f'?{urlencode(base_params, quote_via=urllib.parse.quote)}')
         auth_code = ''
         click.echo('Visit displayed URL to authorize this application. Waiting...')
-        assert listen_port is not None
 
         def set_auth_code(x: str) -> None:
             nonlocal auth_code

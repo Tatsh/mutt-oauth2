@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol, cast
 from unittest.mock import Mock
 
 from mutt_oauth2.main import get_handler, main
@@ -14,6 +14,14 @@ if TYPE_CHECKING:
 
     from click.testing import CliRunner
     from pytest_mock import MockerFixture
+
+
+class _HandlerWithDoGet(Protocol):
+    path: str
+    request_version: str
+
+    def do_GET(self) -> None:  # noqa: N802
+        ...
 
 
 @pytest.fixture
@@ -40,7 +48,7 @@ def test_get_handler(mocker: MockerFixture) -> None:
     handler = get_handler(set_auth_code)(mocker.MagicMock(), '', mocker.MagicMock())
     handler.path = '/?code=blah'
     handler.request_version = 'HTTP/1.1'
-    handler.do_GET()  # type: ignore[attr-defined]
+    cast('_HandlerWithDoGet', handler).do_GET()
     send_response.assert_called_once_with(200)
     send_header.assert_called_with('Content-type', 'text/html')
     end_headers.assert_called_once()
