@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Protocol, cast
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 from mutt_oauth2.main import get_handler, main
 from mutt_oauth2.utils import OAuth2Error, SavedToken
 from typing_extensions import Self
-import pytest
-import requests
+import niquests
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -22,14 +21,6 @@ class _HandlerWithDoGet(Protocol):
 
     def do_GET(self) -> None:  # noqa: N802
         ...
-
-
-@pytest.fixture
-def mock_saved_token(mocker: MockerFixture) -> Mock:
-    mock_token = Mock(spec=SavedToken)
-    mock_token.registration = Mock()
-    mocker.patch('mutt_oauth2.main.SavedToken.from_keyring', return_value=mock_token)
-    return mock_token
 
 
 def test_get_handler(mocker: MockerFixture) -> None:
@@ -63,24 +54,26 @@ def test_main_no_token_no_authorize(runner: CliRunner, mocker: MockerFixture) ->
 
 
 def test_main_with_token_refresh_success(runner: CliRunner, mock_saved_token: Mock,
+                                         mock_async_session: AsyncMock,
                                          mocker: MockerFixture) -> None:
     mock_saved_token.is_access_token_valid.return_value = False
-    mocker.patch.object(mock_saved_token, 'refresh')
     result = runner.invoke(main)
     assert result.exit_code == 0
     mock_saved_token.refresh.assert_called_once()
 
 
 def test_main_with_token_refresh_failure(runner: CliRunner, mock_saved_token: Mock,
+                                         mock_async_session: AsyncMock,
                                          mocker: MockerFixture) -> None:
     mock_saved_token.is_access_token_valid.return_value = False
-    mocker.patch.object(mock_saved_token, 'refresh', side_effect=OAuth2Error)
+    mock_saved_token.refresh = AsyncMock(side_effect=OAuth2Error)
     result = runner.invoke(main)
     assert result.exit_code == 1
     assert 'Caught error attempting refresh.' in result.output
 
 
 def test_main_authorize_new_token_no_auth_code(runner: CliRunner, mock_saved_token: Mock,
+                                               mock_async_session: AsyncMock,
                                                mocker: MockerFixture) -> None:
     mocker.patch('mutt_oauth2.main.SavedToken.from_keyring', return_value=None)
     mocker.patch(
@@ -90,6 +83,7 @@ def test_main_authorize_new_token_no_auth_code(runner: CliRunner, mock_saved_tok
     mocker.patch('mutt_oauth2.main.get_localhost_redirect_uri',
                  return_value=(8080, 'http://localhost:8080/'))
     mocker.patch('mutt_oauth2.main.SavedToken.exchange_auth_for_access',
+                 new_callable=AsyncMock,
                  return_value={
                      'access_token': 'new_token',
                      'expires_in': 3600
@@ -100,12 +94,13 @@ def test_main_authorize_new_token_no_auth_code(runner: CliRunner, mock_saved_tok
 
 
 def test_main_localhost_flow_empty(runner: CliRunner, mock_saved_token: Mock,
-                                   mocker: MockerFixture) -> None:
+                                   mock_async_session: AsyncMock, mocker: MockerFixture) -> None:
     mocker.patch('mutt_oauth2.main.SavedToken.from_keyring', return_value=None)
     mocker.patch(
         'click.prompt',
         side_effect=['microsoft', 'test@example.com', 'client_id', 'client_secret', 'tenant'])
     mocker.patch('mutt_oauth2.main.SavedToken.get_device_code',
+                 new_callable=AsyncMock,
                  return_value={
                      'message': 'Visit this URL',
                      'device_code': 'device_code',
@@ -114,6 +109,7 @@ def test_main_localhost_flow_empty(runner: CliRunner, mock_saved_token: Mock,
     mocker.patch('mutt_oauth2.main.http.server.HTTPServer')
     mocker.patch('mutt_oauth2.main.get_localhost_redirect_uri', return_value=(8080, ''))
     mocker.patch('mutt_oauth2.main.SavedToken.device_poll',
+                 new_callable=AsyncMock,
                  return_value={
                      'access_token': 'new_token',
                      'expires_in': 3600,
@@ -126,12 +122,13 @@ def test_main_localhost_flow_empty(runner: CliRunner, mock_saved_token: Mock,
 
 
 def test_main_authorize_new_token(runner: CliRunner, mock_saved_token: Mock,
-                                  mocker: MockerFixture) -> None:
+                                  mock_async_session: AsyncMock, mocker: MockerFixture) -> None:
     mocker.patch('mutt_oauth2.main.SavedToken.from_keyring', return_value=None)
     mocker.patch(
         'click.prompt',
         side_effect=['microsoft', 'test@example.com', 'client_id', 'client_secret', 'tenant'])
     mocker.patch('mutt_oauth2.main.SavedToken.get_device_code',
+                 new_callable=AsyncMock,
                  return_value={
                      'message': 'Visit this URL',
                      'device_code': 'device_code',
@@ -155,12 +152,13 @@ def test_main_authorize_new_token(runner: CliRunner, mock_saved_token: Mock,
     mocker.patch('mutt_oauth2.main.http.server.HTTPServer', MockHTTPServer)
     mocker.patch('mutt_oauth2.main.get_localhost_redirect_uri', return_value=(8080, ''))
     mocker.patch('mutt_oauth2.main.SavedToken.device_poll',
+                 new_callable=AsyncMock,
                  return_value={
                      'access_token': 'new_token',
                      'expires_in': 3600,
                      'interval': 1
                  })
-    mocker.patch('mutt_oauth2.main.SavedToken.exchange_auth_for_access')
+    mocker.patch('mutt_oauth2.main.SavedToken.exchange_auth_for_access', new_callable=AsyncMock)
     mocker.patch('mutt_oauth2.main.SavedToken.persist')
     mocker.patch('mutt_oauth2.main.SavedToken.as_json')
     result = runner.invoke(main, ('--authorize',))
@@ -168,12 +166,14 @@ def test_main_authorize_new_token(runner: CliRunner, mock_saved_token: Mock,
 
 
 def test_main_authorize_new_token_exchange_fail(runner: CliRunner, mock_saved_token: Mock,
+                                                mock_async_session: AsyncMock,
                                                 mocker: MockerFixture) -> None:
     mocker.patch('mutt_oauth2.main.SavedToken.from_keyring', return_value=None)
     mocker.patch(
         'click.prompt',
         side_effect=['microsoft', 'test@example.com', 'client_id', 'client_secret', 'tenant'])
     mocker.patch('mutt_oauth2.main.SavedToken.get_device_code',
+                 new_callable=AsyncMock,
                  return_value={
                      'message': 'Visit this URL',
                      'device_code': 'device_code',
@@ -197,19 +197,39 @@ def test_main_authorize_new_token_exchange_fail(runner: CliRunner, mock_saved_to
     mocker.patch('mutt_oauth2.main.http.server.HTTPServer', MockHTTPServer)
     mocker.patch('mutt_oauth2.main.get_localhost_redirect_uri', return_value=(8080, ''))
     mocker.patch('mutt_oauth2.main.SavedToken.device_poll',
+                 new_callable=AsyncMock,
                  return_value={
                      'access_token': 'new_token',
                      'expires_in': 3600,
                      'interval': 1
                  })
     mocker.patch('mutt_oauth2.main.SavedToken.exchange_auth_for_access',
-                 side_effect=requests.HTTPError)
+                 new_callable=AsyncMock,
+                 side_effect=niquests.HTTPError)
     result = runner.invoke(main, ('--authorize',))
     assert result.exit_code == 1
 
 
-def test_main_test_auth(runner: CliRunner, mock_saved_token: Mock, mocker: MockerFixture) -> None:
-    try_auth = mocker.patch('mutt_oauth2.main.try_auth')
+def test_main_test_auth(runner: CliRunner, mock_saved_token: Mock, mock_async_session: AsyncMock,
+                        mocker: MockerFixture) -> None:
+    mock_try_auth = mocker.patch('mutt_oauth2.main.try_auth', new_callable=AsyncMock)
     result = runner.invoke(main, ('--test',))
     assert result.exit_code == 0
-    try_auth.assert_called_once_with(mock_saved_token, debug=False)
+    mock_try_auth.assert_called_once_with(mock_saved_token, debug=False)
+
+
+def test_main_test_auth_with_debug(runner: CliRunner, mock_saved_token: Mock,
+                                   mock_async_session: AsyncMock, mocker: MockerFixture) -> None:
+    mock_try_auth = mocker.patch('mutt_oauth2.main.try_auth', new_callable=AsyncMock)
+    result = runner.invoke(main, ('--test', '--debug'))
+    assert result.exit_code == 0
+    mock_try_auth.assert_called_once_with(mock_saved_token, debug=True)
+
+
+def test_main_refresh_http_error(runner: CliRunner, mock_saved_token: Mock,
+                                 mock_async_session: AsyncMock, mocker: MockerFixture) -> None:
+    mock_saved_token.is_access_token_valid.return_value = False
+    mock_saved_token.refresh = AsyncMock(side_effect=niquests.HTTPError)
+    result = runner.invoke(main)
+    assert result.exit_code == 1
+    assert 'Caught error attempting refresh.' in result.output

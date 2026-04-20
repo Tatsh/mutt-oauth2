@@ -4,6 +4,7 @@ from __future__ import annotations
 from base64 import urlsafe_b64encode
 from typing import TYPE_CHECKING
 from urllib.parse import urlencode
+import asyncio
 import contextlib
 import getpass
 import hashlib
@@ -13,8 +14,9 @@ import secrets
 import urllib.parse
 
 from bascom import setup_logging
+from niquests import AsyncSession
 import click
-import requests
+import niquests
 
 from .registrations import registrations
 from .utils import OAuth2Error, SavedToken, get_localhost_redirect_uri, try_auth
@@ -41,7 +43,7 @@ def get_handler(
                 auth_code_callback(querydict['code'][0])
             self.do_HEAD()
             self.wfile.write(b'<html><head><title>Authorisation result</title></head>'
-                             b'<body><p>Authorization redirect completed. You may '
+                             b'<body><p>Authorisation redirect completed. You may '
                              b'close this window.</p></body></html>')
 
     return MyHandler
@@ -57,13 +59,20 @@ def main(username: str,
          authorize: bool = False,
          debug: bool = False,
          test: bool = False) -> None:
-    """Obtain and print a valid OAuth2 access token."""  # noqa: DOC501
+    """Obtain and print a valid OAuth2 access token."""
     setup_logging(debug=debug,
                   loggers={'mutt_oauth2': {
                       'handlers': ('console',),
                       'propagate': False
                   }})
+    asyncio.run(_main_async(username, authorize=authorize, debug=debug, test=test))
+
+
+async def _main_async(username: str, *, authorize: bool, debug: bool, test: bool) -> None:
     token = SavedToken.from_keyring(username)
+    auth_code = ''
+    verifier = ''
+    redirect_uri = ''
     if not token:
         if not authorize or test:
             click.echo('You must run this command with --authorize at least once.', err=True)
@@ -98,8 +107,7 @@ def main(username: str,
             base_params['tenant'] = token.tenant
         click.echo(token.registration.authorize_endpoint +
                    f'?{urlencode(base_params, quote_via=urllib.parse.quote)}')
-        auth_code = ''
-        click.echo('Visit displayed URL to authorize this application. Waiting...')
+        click.echo('Visit displayed URL to authorise this application. Waiting...')
 
         def set_auth_code(x: str) -> None:
             nonlocal auth_code
@@ -111,19 +119,22 @@ def main(username: str,
         if not auth_code:
             click.echo('Did not obtain an authorisation code.', err=True)
             raise click.exceptions.Exit(1)
+    async with AsyncSession() as session:
+        if auth_code:
+            try:
+                data = await token.exchange_auth_for_access(auth_code, verifier, redirect_uri,
+                                                            session)
+            except (OAuth2Error, niquests.HTTPError) as e:
+                raise click.Abort from e
+            token.update(data)
+            token.persist(username)
         try:
-            data = token.exchange_auth_for_access(auth_code, verifier, redirect_uri)
-        except (OAuth2Error, requests.HTTPError) as e:
-            raise click.Abort from e
-        token.update(data)
-        token.persist(username)
-    try:
-        token.refresh(username)
-    except (OAuth2Error, requests.HTTPError) as e:
-        click.echo('Caught error attempting refresh.', err=True)
-        raise click.exceptions.Exit(1) from e
-    log.debug('Token: %s', token.as_json(indent=2))
-    if test:
-        try_auth(token, debug=debug)
-    else:
-        click.echo(token.access_token)
+            await token.refresh(username, session)
+        except (OAuth2Error, niquests.HTTPError) as e:
+            click.echo('Caught error attempting refresh.', err=True)
+            raise click.exceptions.Exit(1) from e
+        log.debug('Token: %s', token.as_json(indent=2))
+        if test:
+            await try_auth(token, debug=debug)
+        else:
+            click.echo(token.access_token)

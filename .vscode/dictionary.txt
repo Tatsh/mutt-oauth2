@@ -43,6 +43,7 @@ genindex
 globaltoc
 hoverxref
 htmlcov
+imaplib
 intersphinx
 isort
 itertools
@@ -76,6 +77,7 @@ onefile
 oneline
 pathlib
 pavelzw
+poplib
 perlis
 pipx
 plistlib
@@ -102,6 +104,7 @@ shellcheck
 shellformat
 shortcmd
 signtool
+smtplib
 snapcore
 snapcraft
 softprops

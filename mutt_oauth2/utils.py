@@ -4,21 +4,25 @@ from __future__ import annotations
 from base64 import standard_b64encode
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Any, Protocol, cast
+from typing import TYPE_CHECKING, Any, Protocol, cast
+import asyncio
 import contextlib
-import imaplib
 import json
 import logging
 import poplib
-import smtplib
 import socket
 
+from anyio.to_thread import run_sync
 from typing_extensions import override
+import aioimaplib  # type: ignore[import-untyped]
+import aiosmtplib
 import keyring
-import requests
 
 from .constants import KEYRING_SERVICE_NAME
 from .registrations import Registration
+
+if TYPE_CHECKING:
+    from niquests import AsyncSession
 
 log = logging.getLogger(__name__)
 
@@ -37,7 +41,14 @@ class OAuth2Error(Exception):
 
 
 def log_oauth2_error(data: dict[str, Any]) -> None:
-    """Log OAuth2 error information."""
+    """
+    Log OAuth2 error information.
+
+    Parameters
+    ----------
+    data : dict[str, Any]
+        Token response containing potential error fields.
+    """
     if 'error' in data:
         log.error('Error type: %s', data['error'])
         if 'error_description' in data:
@@ -46,11 +57,39 @@ def log_oauth2_error(data: dict[str, Any]) -> None:
 
 def build_sasl_string(registration: Registration, user: str, host: str, port: int,
                       bearer_token: str) -> str:
-    if registration.sasl_method == 'OAUTHBEARER':
-        return f'n,a={user},\1host={host}\1port={port}\1auth=Bearer {bearer_token}\1\1'
-    if registration.sasl_method == 'XOAUTH2':
-        return f'user={user}\1auth=Bearer {bearer_token}\1\1'
-    raise ValueError(registration.sasl_method)
+    """
+    Build a SASL authentication string for the given registration.
+
+    Parameters
+    ----------
+    registration : ~mutt_oauth2.registrations.Registration
+        Provider registration containing the SASL method.
+    user : str
+        Account username or email address.
+    host : str
+        Hostname of the mail server.
+    port : int
+        Port number of the mail server.
+    bearer_token : str
+        OAuth2 bearer token.
+
+    Returns
+    -------
+    str
+        The encoded SASL string.
+
+    Raises
+    ------
+    ValueError
+        If the SASL method is not supported.
+    """
+    match registration.sasl_method:
+        case 'OAUTHBEARER':
+            return f'n,a={user},\1host={host}\1port={port}\1auth=Bearer {bearer_token}\1\1'
+        case 'XOAUTH2':
+            return f'user={user}\1auth=Bearer {bearer_token}\1\1'
+        case _:
+            raise ValueError(registration.sasl_method)
 
 
 def object_hook(d: dict[str, Any]) -> Any:
@@ -115,15 +154,22 @@ class SavedToken:
 
         Returns
         -------
-        SavedToken or None
-            The saved token if present, otherwise None.
+        SavedToken | None
+            The saved token if present, otherwise ``None``.
         """
         if token_data := keyring.get_password(KEYRING_SERVICE_NAME, username):
             return SavedToken(**json.loads(token_data, object_hook=object_hook))
         return None
 
     def update(self, data: dict[str, Any]) -> None:
-        """Update the token."""
+        """
+        Update the token.
+
+        Parameters
+        ----------
+        data : dict[str, Any]
+            Token response data from the authorisation server.
+        """
         self.access_token = data['access_token']
         self.access_token_expiration = (datetime.now(tz=timezone.utc) +
                                         timedelta(seconds=int(data['expires_in'])))
@@ -131,7 +177,14 @@ class SavedToken:
             self.refresh_token = data['refresh_token']
 
     def persist(self, username: str) -> None:
-        """Persist the token to the Keyring."""
+        """
+        Persist the token to the Keyring.
+
+        Parameters
+        ----------
+        username : str
+            Keyring username.
+        """
         keyring.set_password(KEYRING_SERVICE_NAME, username, self.as_json())
 
     def is_access_token_valid(self) -> bool:
@@ -153,8 +206,8 @@ class SavedToken:
 
         Parameters
         ----------
-        indent : int or None
-            Indentation width for pretty-printing, or None for compact output.
+        indent : int | None
+            Indentation width for pretty-printing, or ``None`` for compact output.
 
         Returns
         -------
@@ -167,25 +220,33 @@ class SavedToken:
                           indent=indent,
                           sort_keys=True)
 
-    def refresh(self, username: str) -> None:
+    async def refresh(self, username: str, session: AsyncSession) -> None:
         """
         Refresh the access token using the refresh token.
+
+        Parameters
+        ----------
+        username : str
+            Keyring username.
+        session : niquests.AsyncSession
+            HTTP session.
 
         Raises
         ------
         OAuth2Error
+            If the token refresh fails.
         """
         if self.is_access_token_valid():  # pragma: no cover
             return
-        r = requests.post(self.registration.token_endpoint,
-                          data={
-                              'client_id': self.client_id,
-                              'grant_type': 'refresh_token',
-                              'refresh_token': self.refresh_token
-                          } | ({
-                              'client_secret': self.client_secret
-                          } if self.client_secret is not None else {}),
-                          timeout=15)
+        r = await session.post(self.registration.token_endpoint,
+                               data={
+                                   'client_id': self.client_id,
+                                   'grant_type': 'refresh_token',
+                                   'refresh_token': self.refresh_token
+                               } | ({
+                                   'client_secret': self.client_secret
+                               } if self.client_secret is not None else {}),
+                               timeout=15)
         r.raise_for_status()
         if (data := r.json()) and 'error' in data:
             log_oauth2_error(data)
@@ -193,7 +254,8 @@ class SavedToken:
         self.update(data)
         self.persist(username)
 
-    def exchange_auth_for_access(self, auth_code: str, verifier: str, redirect_uri: str) -> Any:
+    async def exchange_auth_for_access(self, auth_code: str, verifier: str, redirect_uri: str,
+                                       session: AsyncSession) -> Any:
         """
         Exchange the authorisation code for an access token.
 
@@ -205,10 +267,12 @@ class SavedToken:
             PKCE code verifier.
         redirect_uri : str
             Redirect URI used in the authorisation request.
+        session : niquests.AsyncSession
+            HTTP session.
 
         Returns
         -------
-        dict
+        Any
             Token response data from the authorisation server.
 
         Raises
@@ -217,31 +281,36 @@ class SavedToken:
             If the token exchange fails.
         """
         log.debug('Exchanging the authorisation code for an access token.')
-        r = requests.post(self.registration.token_endpoint,
-                          data={
-                              'client_id': self.client_id,
-                              'code': auth_code,
-                              'code_verifier': verifier,
-                              'grant_type': 'authorization_code',
-                              'redirect_uri': redirect_uri,
-                              'scope': self.registration.scope
-                          } | ({
-                              'client_secret': self.client_secret
-                          } if self.client_secret is not None else {}),
-                          timeout=15)
+        r = await session.post(self.registration.token_endpoint,
+                               data={
+                                   'client_id': self.client_id,
+                                   'code': auth_code,
+                                   'code_verifier': verifier,
+                                   'grant_type': 'authorization_code',
+                                   'redirect_uri': redirect_uri,
+                                   'scope': self.registration.scope
+                               } | ({
+                                   'client_secret': self.client_secret
+                               } if self.client_secret is not None else {}),
+                               timeout=15)
         r.raise_for_status()
         if (data := r.json()) and 'error' in data:
             log_oauth2_error(data)
             raise OAuth2Error
         return data
 
-    def get_device_code(self) -> Any:
+    async def get_device_code(self, session: AsyncSession) -> Any:
         """
         Get the device code.
 
+        Parameters
+        ----------
+        session : niquests.AsyncSession
+            HTTP session.
+
         Returns
         -------
-        dict
+        Any
             Device authorisation response from the server.
 
         Raises
@@ -249,21 +318,21 @@ class SavedToken:
         OAuth2Error
             If the device code request fails.
         """
-        r = requests.post(self.registration.device_code_endpoint,
-                          data=({
-                              'client_id': self.client_id,
-                              'scope': self.registration.scope
-                          } | ({
-                              'tenant': self.tenant
-                          } if self.tenant else {})),
-                          timeout=15)
+        r = await session.post(self.registration.device_code_endpoint,
+                               data=({
+                                   'client_id': self.client_id,
+                                   'scope': self.registration.scope
+                               } | ({
+                                   'tenant': self.tenant
+                               } if self.tenant else {})),
+                               timeout=15)
         r.raise_for_status()
         if (data := r.json()) and 'error' in data:
             log_oauth2_error(data)
             raise OAuth2Error
         return data
 
-    def device_poll(self, device_code: str) -> Any:
+    async def device_poll(self, device_code: str, session: AsyncSession) -> Any:
         """
         Poll the device code endpoint for the access token.
 
@@ -271,10 +340,12 @@ class SavedToken:
         ----------
         device_code : str
             Device code from :py:meth:`get_device_code`.
+        session : niquests.AsyncSession
+            HTTP session.
 
         Returns
         -------
-        dict
+        Any
             Token response, or an error payload while authorisation is pending.
 
         Raises
@@ -282,17 +353,17 @@ class SavedToken:
         OAuth2Error
             If polling fails with a terminal error.
         """
-        r = requests.post(self.registration.token_endpoint,
-                          data={
-                              'client_id': self.client_id,
-                              'grant_type': 'urn:ietf:params:oauth:grant-type:device_code',
-                              'device_code': device_code
-                          } | ({
-                              'tenant': self.tenant
-                          } if self.tenant else {}) | ({
-                              'client_secret': self.client_secret
-                          } if self.client_secret is not None else {}),
-                          timeout=15)
+        r = await session.post(self.registration.token_endpoint,
+                               data={
+                                   'client_id': self.client_id,
+                                   'grant_type': 'urn:ietf:params:oauth:grant-type:device_code',
+                                   'device_code': device_code
+                               } | ({
+                                   'tenant': self.tenant
+                               } if self.tenant else {}) | ({
+                                   'client_secret': self.client_secret
+                               } if self.client_secret is not None else {}),
+                               timeout=15)
         r.raise_for_status()
         if (data := r.json()) and 'error' in data:
             log_oauth2_error(data)
@@ -300,70 +371,101 @@ class SavedToken:
         return data
 
 
-def try_auth(token: SavedToken, *, debug: bool = False) -> None:
+async def try_auth(token: SavedToken, *, debug: bool = False) -> None:
     """
-    Try to authenticate using passed in token.
+    Try to authenticate using the passed-in token.
+
+    Parameters
+    ----------
+    token : SavedToken
+        Token to test.
+    debug : bool
+        Enable debug output on protocol connections.
 
     Raises
     ------
     RuntimeError
+        If any authentication test fails.
     """
-    errors = False
-    imap_conn = imaplib.IMAP4_SSL(token.registration.imap_endpoint)
-    sasl_string = build_sasl_string(token.registration, token.email,
-                                    token.registration.imap_endpoint, 993, token.access_token)
-    if debug:  # pragma: no cover
-        imap_conn.debug = 4
-    try:
-        imap_conn.authenticate(
-            token.registration.sasl_method,
-            lambda _: sasl_string.encode(),  # pragma: no cover
-        )
-        # Microsoft has a bug wherein a mismatch between username and token can still report a
-        # successful login... (Try a consumer login with the token from a work/school account.)
-        # Fortunately subsequent commands fail with an error. Thus we follow AUTH with another
-        # IMAP command before reporting success.
-        imap_conn.list()
-        log.info('IMAP authentication succeeded.')
-    except imaplib.IMAP4.error:
-        log.exception('IMAP authentication failed. Does your account allow IMAP?')
-        errors = True
-    pop_conn = poplib.POP3_SSL(token.registration.pop_endpoint)
-    sasl_string = build_sasl_string(token.registration, token.email,
-                                    token.registration.pop_endpoint, 995, token.access_token)
-    if debug:  # pragma: no cover
-        pop_conn.set_debuglevel(2)
-    try:
-        # poplib doesn't have an auth command taking an authenticator object
-        # Microsoft requires a two-line SASL for POP
-        pop_via_shortcmd = cast('_Pop3Shortcmd', pop_conn)
-        pop_via_shortcmd._shortcmd(  # noqa: SLF001
-            f'AUTH {token.registration.sasl_method}')
-        pop_via_shortcmd._shortcmd(  # noqa: SLF001
-            standard_b64encode(sasl_string.encode()).decode())
-        log.info('POP authentication succeeded.')
-    except poplib.error_proto:
-        log.exception('POP authentication failed. Does your account allow POP?')
-        errors = True
-    # SMTP_SSL would be simpler but Microsoft does not answer on port 465.
-    smtp_conn = smtplib.SMTP(token.registration.smtp_endpoint, 587)
-    sasl_string = build_sasl_string(token.registration, token.email,
-                                    token.registration.smtp_endpoint, 587, token.access_token)
-    smtp_conn.ehlo('test')
-    smtp_conn.starttls()
-    smtp_conn.ehlo('test')
-    if debug:  # pragma: no cover
-        smtp_conn.set_debuglevel(2)
-    try:
-        smtp_conn.auth(
-            token.registration.sasl_method,
-            lambda _=None: sasl_string,  # pragma: no cover
-        )
-        log.info('SMTP authentication succeeded.')
-    except smtplib.SMTPAuthenticationError:
-        log.exception('SMTP authentication failed.')
-        errors = True
-    if errors:
+    async def _test_imap() -> bool:
+        try:
+            imap_conn = aioimaplib.IMAP4_SSL(token.registration.imap_endpoint)
+            await imap_conn.wait_hello_from_server()
+            sasl_string = build_sasl_string(token.registration, token.email,
+                                            token.registration.imap_endpoint, 993,
+                                            token.access_token)
+            encoded = standard_b64encode(sasl_string.encode()).decode()
+            protocol = imap_conn.protocol
+            response = await asyncio.wait_for(
+                protocol.execute(  # ty: ignore[unresolved-attribute]
+                    aioimaplib.Command(
+                        'AUTHENTICATE',
+                        protocol.new_tag(),  # ty: ignore[unresolved-attribute]
+                        token.registration.sasl_method,
+                        encoded,
+                        loop=protocol.loop  # ty: ignore[invalid-argument-type,unresolved-attribute]
+                    )),
+                imap_conn.timeout)
+            if response.result != 'OK':
+                msg = str(response.lines)
+                raise aioimaplib.AioImapException(msg)  # noqa: TRY301
+            await imap_conn.list('""', '*')  # ty: ignore[invalid-argument-type]
+        except (aioimaplib.AioImapException, aioimaplib.Error):
+            log.exception('IMAP authentication failed. Does your account allow IMAP?')
+            return True
+        else:
+            log.info('IMAP authentication succeeded.')
+            return False
+
+    async def _test_pop() -> bool:
+        def _sync() -> None:
+            pop_conn = poplib.POP3_SSL(token.registration.pop_endpoint)
+            sasl_string = build_sasl_string(token.registration, token.email,
+                                            token.registration.pop_endpoint, 995,
+                                            token.access_token)
+            if debug:  # pragma: no cover
+                pop_conn.set_debuglevel(2)
+            pop_via_shortcmd = cast('_Pop3Shortcmd', pop_conn)
+            pop_via_shortcmd._shortcmd(  # noqa: SLF001
+                f'AUTH {token.registration.sasl_method}')
+            pop_via_shortcmd._shortcmd(  # noqa: SLF001
+                standard_b64encode(sasl_string.encode()).decode())
+
+        try:
+            await run_sync(_sync)
+        except poplib.error_proto:
+            log.exception('POP authentication failed. Does your account allow POP?')
+            return True
+        else:
+            log.info('POP authentication succeeded.')
+            return False
+
+    async def _test_smtp() -> bool:
+        try:
+            smtp_conn = aiosmtplib.SMTP(hostname=token.registration.smtp_endpoint, port=587)
+            await smtp_conn.connect()
+            await smtp_conn.ehlo(hostname='test')
+            await smtp_conn.starttls()
+            await smtp_conn.ehlo(hostname='test')
+            sasl_string = build_sasl_string(token.registration, token.email,
+                                            token.registration.smtp_endpoint, 587,
+                                            token.access_token)
+            encoded = standard_b64encode(sasl_string.encode())
+            response = await smtp_conn.execute_command(b'AUTH',
+                                                       token.registration.sasl_method.encode(),
+                                                       encoded)
+            if response.code != aiosmtplib.SMTPStatus.auth_successful:
+                raise aiosmtplib.SMTPAuthenticationError(  # noqa: TRY301
+                    response.code, response.message)
+        except aiosmtplib.SMTPAuthenticationError:
+            log.exception('SMTP authentication failed.')
+            return True
+        else:
+            log.info('SMTP authentication succeeded.')
+            return False
+
+    results = await asyncio.gather(_test_imap(), _test_pop(), _test_smtp())
+    if any(results):
         raise RuntimeError
 
 

@@ -12,16 +12,31 @@ local utils = import 'utils.libjsonnet';
   security_policy_supported_versions: { '0.1.x': ':white_check_mark:' },
   pyproject+: {
     tool+: {
+      pytest+: {
+        ini_options+: {
+          asyncio_mode: 'auto',
+        },
+      },
+      ruff+: {
+        lint+: {
+          'per-file-ignores'+: {
+            'tests/**'+: ['RUF029'],
+          },
+        },
+      },
       poetry+: {
         dependencies+: {
+          aioimaplib: utils.latestPypiPackageVersionCaret('aioimaplib'),
+          aiosmtplib: utils.latestPypiPackageVersionCaret('aiosmtplib'),
+          anyio: utils.latestPypiPackageVersionCaret('anyio'),
           click: utils.latestPypiPackageVersionCaret('click'),
           keyring: utils.latestPypiPackageVersionCaret('keyring'),
-          requests: utils.latestPypiPackageVersionCaret('requests'),
+          niquests: utils.latestPypiPackageVersionCaret('niquests'),
         },
         group+: {
-          dev+: {
+          tests+: {
             dependencies+: {
-              'types-requests': utils.latestPypiPackageVersionCaret('types-requests'),
+              'pytest-asyncio': utils.latestPypiPackageVersionCaret('pytest-asyncio'),
             },
           },
         },

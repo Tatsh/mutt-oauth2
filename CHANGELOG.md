@@ -9,6 +9,22 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [unreleased]
 
+### Changed
+
+- Migrated HTTP calls from synchronous `requests` to async `niquests`.
+- Migrated IMAP and SMTP auth testing from `imaplib`/`smtplib` to `aioimaplib`/`aiosmtplib`.
+- Core token operations (refresh, exchange, device code, device poll) are now async internally.
+- `--test` auth verification runs IMAP, POP, and SMTP checks concurrently.
+
+### Added
+
+- `anyio` dependency for thread bridging (POP3 still uses synchronous `poplib` via
+  `anyio.to_thread`).
+
+### Removed
+
+- `requests` dependency.
+
 ## [0.1.2]
 
 ### Added
