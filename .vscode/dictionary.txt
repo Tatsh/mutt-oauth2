@@ -1,5 +1,8 @@
+aioimaplib
+aiosmtplib
 anchore
 Ångström
+anyio
 appdir
 appimage
 appinfo
@@ -62,6 +65,7 @@ muttrc
 myproject
 mypy
 namedtuples
+niquests
 norecursedirs
 notarytool
 npmjs
