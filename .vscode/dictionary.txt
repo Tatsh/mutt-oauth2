@@ -71,16 +71,15 @@ norecursedirs
 notarytool
 npmjs
 numpy
-numpydoc
 oauthbearer
 onefile
 oneline
 pathlib
 pavelzw
-poplib
 perlis
 pipx
 plistlib
+poplib
 prodvers
 pycache
 pydantic

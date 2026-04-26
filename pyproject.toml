@@ -6,18 +6,16 @@ requires = ["hatchling"]
 dev = [
   "commitizen>=4.13.10",
   "cz-path>=0.0.6",
-  "mypy>=1.20.0",
-  "ruff>=0.15.10",
-  "ty>=0.0.29",
+  "mypy>=1.20.1",
+  "ruff==0.15.11",
+  "ty>=0.0.31",
   "yapf>=0.43.0",
 ]
 docs = [
   "autodoc-pydantic>=2.2.0",
   "doc8>=2.0.0",
-  "docutils<0.22",
   "enum-tools[sphinx]>=0.13.0",
   "esbonio>=2.0.0",
-  "numpydoc>=1.10.0",
   "restructuredtext-lint>=2.0.2",
   "sphinx-click>=6.2.0",
   "sphinx-datatables>=1.0.0",
@@ -48,12 +46,12 @@ classifiers = [
 ]
 dependencies = [
   "aioimaplib>=2.0.1",
-  "aiosmtplib>=3.0.2",
-  "anyio>=4.10.0",
+  "aiosmtplib>=5.1.0",
+  "anyio>=4.13.0",
   "bascom>=0.1.2",
   "click>=8.3.2",
   "keyring>=25.7.0",
-  "niquests>=3.18.5",
+  "niquests>=3.18.6",
   "typing-extensions>=4.15.0",
 ]
 description = "Packaged, maintained version of contributed mutt_oauth2.py script."
@@ -120,7 +118,7 @@ omit = [
 max-line-length = 100
 
 [tool.hatch.build.targets.sdist]
-include = ["mutt_oauth2", "tests"]
+include = ["mutt_oauth2", "man", "tests"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["mutt_oauth2"]
@@ -265,4 +263,4 @@ split_penalty_logical_operator = 300
 use_tabs = false
 
 [tool.yapfignore]
-ignore_patterns = [".venv/**", "node_modules/**"]
+ignore_patterns = [".venv", ".wiswa-ci", "node_modules"]
