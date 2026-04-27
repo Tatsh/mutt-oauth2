@@ -30,5 +30,5 @@ platforms:
 source-code: 'https://github.com/Tatsh/mutt-oauth2'
 summary: 'Packaged, maintained version of contributed mutt_oauth2.py script.'
 title: 'mutt-oauth2'
-version: '0.1.2'
+version: '0.2.0'
 website: 'https://tatsh.github.io/mutt-oauth2/'

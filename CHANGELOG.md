@@ -9,17 +9,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [unreleased]
 
+## [0.2.0] - 2026-04-26
+
+### Added
+
+- `anyio` dependency for thread bridging (POP3 still uses synchronous `poplib` via
+  `anyio.to_thread`).
+
 ### Changed
 
 - Migrated HTTP calls from synchronous `requests` to async `niquests`.
 - Migrated IMAP and SMTP auth testing from `imaplib`/`smtplib` to `aioimaplib`/`aiosmtplib`.
 - Core token operations (refresh, exchange, device code, device poll) are now async internally.
 - `--test` auth verification runs IMAP, POP, and SMTP checks concurrently.
-
-### Added
-
-- `anyio` dependency for thread bridging (POP3 still uses synchronous `poplib` via
-  `anyio.to_thread`).
 
 ### Removed
 
@@ -56,7 +58,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added content to `index.rst` based on README
 - Man page
 
-[unreleased]: https://github.com/Tatsh/mutt-oauth2/compare/v0.1.2...HEAD
+[unreleased]: https://github.com/Tatsh/mutt-oauth2/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/Tatsh/mutt-oauth2/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/Tatsh/mutt-oauth2/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/Tatsh/mutt-oauth2/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Tatsh/mutt-oauth2/compare/v0.0.3...v0.1.0
