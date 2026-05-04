@@ -75,6 +75,8 @@ html_theme_options = {
     'toc_title_is_page_title': True
 }
 intersphinx_mapping = {
+    'aiosmtplib': ('https://aiosmtplib.readthedocs.io/en/stable/', None),
+    'anyio': ('https://anyio.readthedocs.io/en/stable/', None),
     'bascom': ('https://bascom.readthedocs.io/en/latest/', None),
     'click': ('https://click.palletsprojects.com/en/latest/', None),
     'keyring': ('https://keyring.readthedocs.io/en/latest/', None),
