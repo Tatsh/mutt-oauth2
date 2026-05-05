@@ -9,7 +9,7 @@ local utils = import 'utils.libjsonnet';
   want_main: true,
   want_flatpak: true,
   publishing+: { flathub: 'sh.tat.mutt-oauth2' },
-  security_policy_supported_versions: { '0.1.x': ':white_check_mark:' },
+  security_policy_supported_versions: { '0.2.x': ':white_check_mark:' },
   pyproject+: {
     tool+: {
       pytest+: {
