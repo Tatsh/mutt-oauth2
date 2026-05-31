@@ -388,7 +388,7 @@ async def try_auth(token: SavedToken, *, debug: bool = False) -> None:
         If any authentication test fails.
     """
     async def _test_imap() -> bool:
-        try:
+        async def _authenticate() -> None:
             imap_conn = aioimaplib.IMAP4_SSL(token.registration.imap_endpoint)
             await imap_conn.wait_hello_from_server()
             sasl_string = build_sasl_string(token.registration, token.email,
@@ -407,9 +407,11 @@ async def try_auth(token: SavedToken, *, debug: bool = False) -> None:
                     )),
                 imap_conn.timeout)
             if response.result != 'OK':
-                msg = str(response.lines)
-                raise aioimaplib.AioImapException(msg)  # noqa: TRY301
+                raise aioimaplib.AioImapException(str(response.lines))
             await imap_conn.list('""', '*')  # ty: ignore[invalid-argument-type]
+
+        try:
+            await _authenticate()
         except (aioimaplib.AioImapException, aioimaplib.Error):
             log.exception('IMAP authentication failed. Does your account allow IMAP?')
             return True
@@ -441,7 +443,7 @@ async def try_auth(token: SavedToken, *, debug: bool = False) -> None:
             return False
 
     async def _test_smtp() -> bool:
-        try:
+        async def _authenticate() -> None:
             smtp_conn = aiosmtplib.SMTP(hostname=token.registration.smtp_endpoint, port=587)
             await smtp_conn.connect()
             await smtp_conn.ehlo(hostname='test')
@@ -455,8 +457,10 @@ async def try_auth(token: SavedToken, *, debug: bool = False) -> None:
                                                        token.registration.sasl_method.encode(),
                                                        encoded)
             if response.code != aiosmtplib.SMTPStatus.auth_successful:
-                raise aiosmtplib.SMTPAuthenticationError(  # noqa: TRY301
-                    response.code, response.message)
+                raise aiosmtplib.SMTPAuthenticationError(response.code, response.message)
+
+        try:
+            await _authenticate()
         except aiosmtplib.SMTPAuthenticationError:
             log.exception('SMTP authentication failed.')
             return True
