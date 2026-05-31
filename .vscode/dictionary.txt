@@ -69,7 +69,6 @@ namedtuples
 niquests
 norecursedirs
 notarytool
-npmjs
 numpy
 oauthbearer
 onefile
@@ -80,6 +79,7 @@ perlis
 pipx
 plistlib
 poplib
+preapproved
 prodvers
 pycache
 pydantic
@@ -122,12 +122,15 @@ tostring
 tryfirst
 ubyte
 udvare
+undraft
+undrafted
 vendored
 venv
 vers
 virtualenv
 wiswa
 wiswa's
+worktree
 xcrun
 xoauth
 yapf
