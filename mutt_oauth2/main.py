@@ -83,7 +83,11 @@ async def _main_async(username: str, *, authorize: bool, debug: bool, logout: bo
     verifier = ''
     redirect_uri = ''
     if logout:
-        delete_from_keyring(username)
+        try:
+            delete_from_keyring(username)
+        except OAuth2Error as e:
+            click.echo(str(e), err=True)
+            raise click.exceptions.Exit(1) from e
         return
     if not token and not authorize:
         click.echo('You must run this command with --authorize at least once.', err=True)
