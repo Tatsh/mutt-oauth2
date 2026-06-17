@@ -80,22 +80,23 @@ async def _main_async(username: str, *, authorize: bool, debug: bool, logout: bo
     if logout:
         delete_from_keyring(username)
         return
-    if not token:
-        if not authorize or test:
-            click.echo('You must run this command with --authorize at least once.', err=True)
-            raise click.exceptions.Exit(1)
-        token = SavedToken(access_token_expiration=None,
-                           registration=getattr(
-                               registrations,
-                               click.prompt('OAuth2 registration',
-                                            default='google',
-                                            type=click.Choice(['google', 'microsoft']))),
-                           email=click.prompt('Account e-mail address'),
-                           client_id=click.prompt('Client ID'),
-                           client_secret=click.prompt('Client secret', default='') or None)
-        log.debug('Settings thus far: %s', token.as_json(indent=2))
-        if token.registration.tenant is not None:  # pragma: no cover
-            token.tenant = click.prompt('Tenant', default=token.registration.tenant)
+    if not token and not authorize:
+        click.echo('You must run this command with --authorize at least once.', err=True)
+        raise click.exceptions.Exit(1)
+    if authorize:
+        if not token:
+            token = SavedToken(access_token_expiration=None,
+                               registration=getattr(
+                                   registrations,
+                                   click.prompt('OAuth2 registration',
+                                                default='google',
+                                                type=click.Choice(['google', 'microsoft']))),
+                               email=click.prompt('Account e-mail address'),
+                               client_id=click.prompt('Client ID'),
+                               client_secret=click.prompt('Client secret', default='') or None)
+            log.debug('Settings thus far: %s', token.as_json(indent=2))
+            if token.registration.tenant is not None:  # pragma: no cover
+                token.tenant = click.prompt('Tenant', default=token.registration.tenant)
         verifier = secrets.token_urlsafe(90)
         challenge = urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest())[:-1]
         redirect_uri = token.registration.redirect_uri

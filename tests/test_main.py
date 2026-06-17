@@ -251,3 +251,19 @@ def test_main_logout(runner: CliRunner, mocker: MockerFixture) -> None:
     result = runner.invoke(main, ('--logout',))
     assert result.exit_code == 0
     mock_delete.assert_called_once()
+
+
+def test_main_authorize_with_existing_token(runner: CliRunner, mock_saved_token: Mock,
+                                            mock_async_session: AsyncMock,
+                                            mocker: MockerFixture) -> None:
+    mock_saved_token.client_id = 'client_id'
+    mock_saved_token.email = 'test@example.com'
+    mock_saved_token.tenant = None
+    mock_saved_token.registration.scope = 'https://example.com/scope'
+    mock_saved_token.registration.authorize_endpoint = 'https://example.com/authorize'
+    mocker.patch('mutt_oauth2.main.http.server.HTTPServer')
+    mocker.patch('mutt_oauth2.main.get_localhost_redirect_uri',
+                 return_value=(8080, 'http://localhost:8080/'))
+    result = runner.invoke(main, ('--authorize',))
+    assert result.exit_code == 1
+    assert 'Did not obtain an authorisation code.' in result.output
