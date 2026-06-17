@@ -69,7 +69,7 @@ def test_main_with_token_refresh_failure(runner: CliRunner, mock_saved_token: Mo
     mock_saved_token.refresh = AsyncMock(side_effect=OAuth2Error)
     result = runner.invoke(main)
     assert result.exit_code == 1
-    assert 'Caught error attempting refresh.' in result.output
+    assert 'Caught error attempting refresh' in result.output
 
 
 def test_main_authorize_new_token_no_auth_code(runner: CliRunner, mock_saved_token: Mock,
@@ -233,3 +233,14 @@ def test_main_refresh_http_error(runner: CliRunner, mock_saved_token: Mock,
     result = runner.invoke(main)
     assert result.exit_code == 1
     assert 'Caught error attempting refresh.' in result.output
+
+
+def test_main_refresh_invalid_grant(runner: CliRunner, mock_saved_token: Mock,
+                                    mock_async_session: AsyncMock,
+                                    mocker: MockerFixture) -> None:
+    mock_saved_token.is_access_token_valid.return_value = False
+    mock_saved_token.refresh = AsyncMock(
+        side_effect=OAuth2Error('Token has been expired or revoked.'))
+    result = runner.invoke(main)
+    assert result.exit_code == 1
+    assert 'Token has been expired or revoked.' in result.output

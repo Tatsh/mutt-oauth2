@@ -130,7 +130,10 @@ async def _main_async(username: str, *, authorize: bool, debug: bool, test: bool
             token.persist(username)
         try:
             await token.refresh(username, session)
-        except (OAuth2Error, niquests.HTTPError) as e:
+        except OAuth2Error as e:
+            click.echo(f'Caught error attempting refresh: {e}', err=True)
+            raise click.exceptions.Exit(1) from e
+        except niquests.HTTPError as e:
             click.echo('Caught error attempting refresh.', err=True)
             raise click.exceptions.Exit(1) from e
         log.debug('Token: %s', token.as_json(indent=2))

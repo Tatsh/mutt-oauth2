@@ -234,7 +234,7 @@ class SavedToken:
         Raises
         ------
         OAuth2Error
-            If the token refresh fails.
+            If the token refresh fails, including ``invalid_grant`` errors.
         """
         if self.is_access_token_valid():  # pragma: no cover
             return
@@ -250,7 +250,7 @@ class SavedToken:
         r.raise_for_status()
         if (data := r.json()) and 'error' in data:
             log_oauth2_error(data)
-            raise OAuth2Error
+            raise OAuth2Error(data.get('error_description') or data['error'])
         self.update(data)
         self.persist(username)
 
@@ -296,7 +296,7 @@ class SavedToken:
         r.raise_for_status()
         if (data := r.json()) and 'error' in data:
             log_oauth2_error(data)
-            raise OAuth2Error
+            raise OAuth2Error(data.get('error_description') or data['error'])
         return data
 
     async def get_device_code(self, session: AsyncSession) -> Any:
@@ -329,7 +329,7 @@ class SavedToken:
         r.raise_for_status()
         if (data := r.json()) and 'error' in data:
             log_oauth2_error(data)
-            raise OAuth2Error
+            raise OAuth2Error(data.get('error_description') or data['error'])
         return data
 
     async def device_poll(self, device_code: str, session: AsyncSession) -> Any:
@@ -367,7 +367,7 @@ class SavedToken:
         r.raise_for_status()
         if (data := r.json()) and 'error' in data:
             log_oauth2_error(data)
-            raise OAuth2Error
+            raise OAuth2Error(data.get('error_description') or data['error'])
         return data
 
 
