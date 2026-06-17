@@ -236,8 +236,7 @@ def test_main_refresh_http_error(runner: CliRunner, mock_saved_token: Mock,
 
 
 def test_main_refresh_invalid_grant(runner: CliRunner, mock_saved_token: Mock,
-                                    mock_async_session: AsyncMock,
-                                    mocker: MockerFixture) -> None:
+                                    mock_async_session: AsyncMock, mocker: MockerFixture) -> None:
     mock_saved_token.is_access_token_valid.return_value = False
     mock_saved_token.refresh = AsyncMock(
         side_effect=OAuth2Error('Token has been expired or revoked.'))

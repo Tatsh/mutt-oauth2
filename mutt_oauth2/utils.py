@@ -69,6 +69,7 @@ def delete_from_keyring(username: str) -> None:
     except keyring.errors.PasswordDeleteError:
         pass
 
+
 def build_sasl_string(registration: Registration, user: str, host: str, port: int,
                       bearer_token: str) -> str:
     """
