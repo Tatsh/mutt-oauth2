@@ -252,6 +252,21 @@ def test_main_logout(runner: CliRunner, mocker: MockerFixture) -> None:
     mock_delete.assert_called_once()
 
 
+def test_main_logout_not_found(runner: CliRunner, mocker: MockerFixture) -> None:
+    mocker.patch('mutt_oauth2.main.delete_from_keyring',
+                 side_effect=OAuth2Error('No stored credential found for `testuser`.'))
+    result = runner.invoke(main, ('--logout',))
+    assert result.exit_code == 1
+    assert 'No stored credential found for `testuser`.' in result.output
+
+
+def test_main_logout_delete_failure(runner: CliRunner, mocker: MockerFixture) -> None:
+    mocker.patch('mutt_oauth2.main.delete_from_keyring',
+                 side_effect=OAuth2Error('Failed to delete credential for `testuser`.'))
+    result = runner.invoke(main, ('--logout',))
+    assert result.exit_code == 1
+    assert 'Failed to delete credential for `testuser`.' in result.output
+
 def test_main_authorize_with_existing_token(runner: CliRunner, mock_saved_token: Mock,
                                             mock_async_session: AsyncMock,
                                             mocker: MockerFixture) -> None:

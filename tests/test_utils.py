@@ -11,6 +11,7 @@ from mutt_oauth2.utils import (
     OAuth2Error,
     SavedToken,
     build_sasl_string,
+    delete_from_keyring,
     get_localhost_redirect_uri,
     log_oauth2_error,
     object_hook,
@@ -695,3 +696,26 @@ def test_get_localhost_redirect_uri() -> None:
     port, uri = get_localhost_redirect_uri()
     assert isinstance(port, int)
     assert uri.startswith('http://localhost:')
+
+
+
+def test_delete_from_keyring_success(mocker: MockerFixture) -> None:
+    mocker.patch('mutt_oauth2.utils.keyring.get_password', return_value='token')
+    mock_delete = mocker.patch('mutt_oauth2.utils.keyring.delete_password')
+    delete_from_keyring('testuser')
+    mock_delete.assert_called_once()
+
+
+def test_delete_from_keyring_not_found(mocker: MockerFixture) -> None:
+    mocker.patch('mutt_oauth2.utils.keyring.get_password', return_value=None)
+    with pytest.raises(OAuth2Error, match='No stored credential found for'):
+        delete_from_keyring('testuser')
+
+
+def test_delete_from_keyring_delete_failure(mocker: MockerFixture) -> None:
+    import keyring.errors
+    mocker.patch('mutt_oauth2.utils.keyring.get_password', return_value='token')
+    mocker.patch('mutt_oauth2.utils.keyring.delete_password',
+                 side_effect=keyring.errors.PasswordDeleteError)
+    with pytest.raises(OAuth2Error, match='Failed to delete credential for'):
+        delete_from_keyring('testuser')
