@@ -70,11 +70,13 @@ def delete_from_keyring(username: str) -> None:
         If no credential exists for the username, or if deletion fails.
     """
     if keyring.get_password(KEYRING_SERVICE_NAME, username) is None:
-        raise OAuth2Error(f'No stored credential found for `{username}`.')
+        msg = f'No stored credential found for `{username}`.'
+        raise OAuth2Error(msg)
     try:
         keyring.delete_password(KEYRING_SERVICE_NAME, username)
     except keyring.errors.PasswordDeleteError as e:
-        raise OAuth2Error(f'Failed to delete credential for `{username}`.' ) from e
+        msg = f'Failed to delete credential for `{username}`.'
+        raise OAuth2Error(msg) from e
 
 
 def build_sasl_string(registration: Registration, user: str, host: str, port: int,
