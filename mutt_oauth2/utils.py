@@ -32,8 +32,8 @@ class _Pop3Shortcmd(Protocol):
         ...
 
 
-__all__ = ('OAuth2Error', 'SavedToken', 'get_localhost_redirect_uri', 'log_oauth2_error',
-           'try_auth')
+__all__ = ('OAuth2Error', 'SavedToken', 'delete_from_keyring', 'get_localhost_redirect_uri',
+           'log_oauth2_error', 'try_auth')
 
 
 class OAuth2Error(Exception):
@@ -54,6 +54,20 @@ def log_oauth2_error(data: dict[str, Any]) -> None:
         if 'error_description' in data:
             log.error('Description: %s', data['error_description'])
 
+
+def delete_from_keyring(username: str) -> None:
+    """
+    Delete a stored token from the keyring.
+
+    Parameters
+    ----------
+    username : str
+        Keyring username.
+    """
+    try:
+        keyring.delete_password(KEYRING_SERVICE_NAME, username)
+    except keyring.errors.PasswordDeleteError:
+        pass
 
 def build_sasl_string(registration: Registration, user: str, host: str, port: int,
                       bearer_token: str) -> str:

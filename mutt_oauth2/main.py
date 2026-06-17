@@ -19,7 +19,8 @@ import click
 import niquests
 
 from .registrations import registrations
-from .utils import OAuth2Error, SavedToken, get_localhost_redirect_uri, try_auth
+from .utils import (OAuth2Error, SavedToken, delete_from_keyring, get_localhost_redirect_uri,
+                    try_auth)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -52,12 +53,14 @@ def get_handler(
 @click.command(context_settings={'help_option_names': ('-h', '--help')})
 @click.option('-a', '--authorize', help='Manually authorise new tokens.', is_flag=True)
 @click.option('-d', '--debug', help='Enable debug logging.', is_flag=True)
+@click.option('-l', '--logout', help='Remove stored tokens from the keyring.', is_flag=True)
 @click.option('-t', '--test', help='Test authentication.', is_flag=True)
 @click.option('-u', '--username', help='Keyring username.', default=getpass.getuser())
 def main(username: str,
          *,
          authorize: bool = False,
          debug: bool = False,
+         logout: bool = False,
          test: bool = False) -> None:
     """Obtain and print a valid OAuth2 access token."""
     setup_logging(debug=debug,
@@ -65,14 +68,18 @@ def main(username: str,
                       'handlers': ('console',),
                       'propagate': False
                   }})
-    asyncio.run(_main_async(username, authorize=authorize, debug=debug, test=test))
+    asyncio.run(_main_async(username, authorize=authorize, debug=debug, logout=logout, test=test))
 
 
-async def _main_async(username: str, *, authorize: bool, debug: bool, test: bool) -> None:
+async def _main_async(username: str, *, authorize: bool, debug: bool, logout: bool,
+                      test: bool) -> None:
     token = SavedToken.from_keyring(username)
     auth_code = ''
     verifier = ''
     redirect_uri = ''
+    if logout:
+        delete_from_keyring(username)
+        return
     if not token:
         if not authorize or test:
             click.echo('You must run this command with --authorize at least once.', err=True)

@@ -244,3 +244,10 @@ def test_main_refresh_invalid_grant(runner: CliRunner, mock_saved_token: Mock,
     result = runner.invoke(main)
     assert result.exit_code == 1
     assert 'Token has been expired or revoked.' in result.output
+
+
+def test_main_logout(runner: CliRunner, mocker: MockerFixture) -> None:
+    mock_delete = mocker.patch('mutt_oauth2.main.delete_from_keyring')
+    result = runner.invoke(main, ('--logout',))
+    assert result.exit_code == 0
+    mock_delete.assert_called_once()
