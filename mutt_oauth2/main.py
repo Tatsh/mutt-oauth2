@@ -19,8 +19,13 @@ import click
 import niquests
 
 from .registrations import registrations
-from .utils import (OAuth2Error, SavedToken, delete_from_keyring, get_localhost_redirect_uri,
-                    try_auth)
+from .utils import (
+    OAuth2Error,
+    SavedToken,
+    delete_from_keyring,
+    get_localhost_redirect_uri,
+    try_auth,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
