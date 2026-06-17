@@ -267,6 +267,7 @@ def test_main_logout_delete_failure(runner: CliRunner, mocker: MockerFixture) ->
     assert result.exit_code == 1
     assert 'Failed to delete credential for `testuser`.' in result.output
 
+
 def test_main_authorize_with_existing_token(runner: CliRunner, mock_saved_token: Mock,
                                             mock_async_session: AsyncMock,
                                             mocker: MockerFixture) -> None:

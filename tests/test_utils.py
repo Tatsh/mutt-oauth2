@@ -698,7 +698,6 @@ def test_get_localhost_redirect_uri() -> None:
     assert uri.startswith('http://localhost:')
 
 
-
 def test_delete_from_keyring_success(mocker: MockerFixture) -> None:
     mocker.patch('mutt_oauth2.utils.keyring.get_password', return_value='token')
     mock_delete = mocker.patch('mutt_oauth2.utils.keyring.delete_password')
