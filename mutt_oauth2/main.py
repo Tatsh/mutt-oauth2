@@ -19,7 +19,13 @@ import click
 import niquests
 
 from .registrations import registrations
-from .utils import OAuth2Error, SavedToken, get_localhost_redirect_uri, try_auth
+from .utils import (
+    OAuth2Error,
+    SavedToken,
+    delete_from_keyring,
+    get_localhost_redirect_uri,
+    try_auth,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -52,12 +58,14 @@ def get_handler(
 @click.command(context_settings={'help_option_names': ('-h', '--help')})
 @click.option('-a', '--authorize', help='Manually authorise new tokens.', is_flag=True)
 @click.option('-d', '--debug', help='Enable debug logging.', is_flag=True)
+@click.option('-l', '--logout', help='Remove stored tokens from the keyring.', is_flag=True)
 @click.option('-t', '--test', help='Test authentication.', is_flag=True)
 @click.option('-u', '--username', help='Keyring username.', default=getpass.getuser())
 def main(username: str,
          *,
          authorize: bool = False,
          debug: bool = False,
+         logout: bool = False,
          test: bool = False) -> None:
     """Obtain and print a valid OAuth2 access token."""
     setup_logging(debug=debug,
@@ -65,30 +73,39 @@ def main(username: str,
                       'handlers': ('console',),
                       'propagate': False
                   }})
-    asyncio.run(_main_async(username, authorize=authorize, debug=debug, test=test))
+    asyncio.run(_main_async(username, authorize=authorize, debug=debug, logout=logout, test=test))
 
 
-async def _main_async(username: str, *, authorize: bool, debug: bool, test: bool) -> None:
+async def _main_async(username: str, *, authorize: bool, debug: bool, logout: bool,
+                      test: bool) -> None:
     token = SavedToken.from_keyring(username)
     auth_code = ''
     verifier = ''
     redirect_uri = ''
-    if not token:
-        if not authorize or test:
-            click.echo('You must run this command with --authorize at least once.', err=True)
-            raise click.exceptions.Exit(1)
-        token = SavedToken(access_token_expiration=None,
-                           registration=getattr(
-                               registrations,
-                               click.prompt('OAuth2 registration',
-                                            default='google',
-                                            type=click.Choice(['google', 'microsoft']))),
-                           email=click.prompt('Account e-mail address'),
-                           client_id=click.prompt('Client ID'),
-                           client_secret=click.prompt('Client secret', default='') or None)
-        log.debug('Settings thus far: %s', token.as_json(indent=2))
-        if token.registration.tenant is not None:  # pragma: no cover
-            token.tenant = click.prompt('Tenant', default=token.registration.tenant)
+    if logout:
+        try:
+            delete_from_keyring(username)
+        except OAuth2Error as e:
+            click.echo(str(e), err=True)
+            raise click.exceptions.Exit(1) from e
+        return
+    if not token and not authorize:
+        click.echo('You must run this command with --authorize at least once.', err=True)
+        raise click.exceptions.Exit(1)
+    if authorize:
+        if not token:
+            token = SavedToken(access_token_expiration=None,
+                               registration=getattr(
+                                   registrations,
+                                   click.prompt('OAuth2 registration',
+                                                default='google',
+                                                type=click.Choice(['google', 'microsoft']))),
+                               email=click.prompt('Account e-mail address'),
+                               client_id=click.prompt('Client ID'),
+                               client_secret=click.prompt('Client secret', default='') or None)
+            log.debug('Settings thus far: %s', token.as_json(indent=2))
+            if token.registration.tenant is not None:  # pragma: no cover
+                token.tenant = click.prompt('Tenant', default=token.registration.tenant)
         verifier = secrets.token_urlsafe(90)
         challenge = urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest())[:-1]
         redirect_uri = token.registration.redirect_uri
@@ -130,7 +147,10 @@ async def _main_async(username: str, *, authorize: bool, debug: bool, test: bool
             token.persist(username)
         try:
             await token.refresh(username, session)
-        except (OAuth2Error, niquests.HTTPError) as e:
+        except OAuth2Error as e:
+            click.echo(f'Caught error attempting refresh: {e}', err=True)
+            raise click.exceptions.Exit(1) from e
+        except niquests.HTTPError as e:
             click.echo('Caught error attempting refresh.', err=True)
             raise click.exceptions.Exit(1) from e
         log.debug('Token: %s', token.as_json(indent=2))
