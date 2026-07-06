@@ -17,6 +17,7 @@ from typing_extensions import override
 import aioimaplib  # type: ignore[import-untyped]
 import aiosmtplib
 import keyring
+import keyring.errors
 
 from .constants import KEYRING_SERVICE_NAME
 from .registrations import Registration

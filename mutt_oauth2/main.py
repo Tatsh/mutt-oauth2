@@ -78,10 +78,6 @@ def main(username: str,
 
 async def _main_async(username: str, *, authorize: bool, debug: bool, logout: bool,
                       test: bool) -> None:
-    token = SavedToken.from_keyring(username)
-    auth_code = ''
-    verifier = ''
-    redirect_uri = ''
     if logout:
         try:
             delete_from_keyring(username)
@@ -89,6 +85,10 @@ async def _main_async(username: str, *, authorize: bool, debug: bool, logout: bo
             click.echo(str(e), err=True)
             raise click.exceptions.Exit(1) from e
         return
+    token = SavedToken.from_keyring(username)
+    auth_code = ''
+    verifier = ''
+    redirect_uri = ''
     if not token and not authorize:
         click.echo('You must run this command with --authorize at least once.', err=True)
         raise click.exceptions.Exit(1)
