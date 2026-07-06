@@ -136,6 +136,8 @@ async def _main_async(username: str, *, authorize: bool, debug: bool, logout: bo
         if not auth_code:
             click.echo('Did not obtain an authorisation code.', err=True)
             raise click.exceptions.Exit(1)
+    if token is None:
+        raise click.exceptions.Exit(1)
     async with AsyncSession() as session:
         if auth_code:
             try:
