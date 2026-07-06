@@ -17,6 +17,7 @@ from mutt_oauth2.utils import (
     try_auth,
 )
 import aiosmtplib
+import niquests
 import pytest
 
 if TYPE_CHECKING:
@@ -257,6 +258,33 @@ async def test_saved_token_exchange_auth_for_access_raises_oauth2error_when_resp
                                                  scope='email'))
     with pytest.raises(OAuth2Error):
         await token.exchange_auth_for_access('auth_code', 'verifier', 'redirect_uri', mock_session)
+
+
+async def test_saved_token_exchange_auth_for_access_raises_oauth2error_for_http_error_payload(
+        mocker: MockerFixture) -> None:
+    mock_response = MagicMock(json=lambda: {
+        'error': 'invalid_grant',
+        'error_description': 'Token is expired or revoked.'
+    })
+    mock_response.raise_for_status = MagicMock(side_effect=niquests.HTTPError)
+    mock_session = AsyncMock()
+    mock_session.post = AsyncMock(return_value=mock_response)
+    token = SavedToken(access_token_expiration=None,
+                       client_id='client_id',
+                       client_secret='client_secret',
+                       email='email',
+                       registration=Registration(sasl_method='XOAUTH2',
+                                                 authorize_endpoint='http://example.com/authorize',
+                                                 device_code_endpoint='http://example.com/device',
+                                                 token_endpoint='http://example.com/token',
+                                                 redirect_uri='http://localhost',
+                                                 imap_endpoint='imap.example.com',
+                                                 pop_endpoint='pop.example.com',
+                                                 smtp_endpoint='smtp.example.com',
+                                                 scope='email'))
+    with pytest.raises(OAuth2Error, match=r'Token is expired or revoked\.'):
+        await token.exchange_auth_for_access('auth_code', 'verifier', 'redirect_uri', mock_session)
+    mock_response.raise_for_status.assert_not_called()
 
 
 async def test_saved_token_get_device_code(mocker: MockerFixture) -> None:
