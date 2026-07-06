@@ -304,6 +304,8 @@ class SavedToken:
         ------
         OAuth2Error
             If the token exchange fails.
+        ValueError
+            If the token endpoint returns a non-JSON success payload.
         """
         log.debug('Exchanging the authorisation code for an access token.')
         r = await session.post(self.registration.token_endpoint,
@@ -318,10 +320,15 @@ class SavedToken:
                                    'client_secret': self.client_secret
                                } if self.client_secret is not None else {}),
                                timeout=15)
-        r.raise_for_status()
-        if (data := r.json()) and 'error' in data:
+        try:
+            data = r.json()
+        except ValueError:
+            r.raise_for_status()
+            raise
+        if isinstance(data, dict) and 'error' in data:
             log_oauth2_error(data)
             raise OAuth2Error(data.get('error_description') or data['error'])
+        r.raise_for_status()
         return data
 
     async def get_device_code(self, session: AsyncSession) -> Any:
