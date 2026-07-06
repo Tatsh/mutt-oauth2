@@ -66,10 +66,10 @@ def test_main_with_token_refresh_failure(runner: CliRunner, mock_saved_token: Mo
                                          mock_async_session: AsyncMock,
                                          mocker: MockerFixture) -> None:
     mock_saved_token.is_access_token_valid.return_value = False
-    mock_saved_token.refresh = AsyncMock(side_effect=OAuth2Error)
+    mock_saved_token.refresh = AsyncMock(side_effect=OAuth2Error('token refresh rejected'))
     result = runner.invoke(main)
     assert result.exit_code == 1
-    assert 'Caught error attempting refresh.' in result.output
+    assert 'Caught error attempting refresh: token refresh rejected' in result.output
 
 
 def test_main_authorize_new_token_no_auth_code(runner: CliRunner, mock_saved_token: Mock,
@@ -233,3 +233,52 @@ def test_main_refresh_http_error(runner: CliRunner, mock_saved_token: Mock,
     result = runner.invoke(main)
     assert result.exit_code == 1
     assert 'Caught error attempting refresh.' in result.output
+
+
+def test_main_refresh_invalid_grant(runner: CliRunner, mock_saved_token: Mock,
+                                    mock_async_session: AsyncMock, mocker: MockerFixture) -> None:
+    mock_saved_token.is_access_token_valid.return_value = False
+    mock_saved_token.refresh = AsyncMock(
+        side_effect=OAuth2Error('Token has been expired or revoked.'))
+    result = runner.invoke(main)
+    assert result.exit_code == 1
+    assert 'Token has been expired or revoked.' in result.output
+
+
+def test_main_logout(runner: CliRunner, mocker: MockerFixture) -> None:
+    mock_delete = mocker.patch('mutt_oauth2.main.delete_from_keyring')
+    result = runner.invoke(main, ('--username', 'testuser', '--logout'))
+    assert result.exit_code == 0
+    mock_delete.assert_called_once_with('testuser')
+
+
+def test_main_logout_not_found(runner: CliRunner, mocker: MockerFixture) -> None:
+    mocker.patch('mutt_oauth2.main.delete_from_keyring',
+                 side_effect=OAuth2Error('No stored credential found for `testuser`.'))
+    result = runner.invoke(main, ('--username', 'testuser', '--logout'))
+    assert result.exit_code == 1
+    assert 'No stored credential found for `testuser`.' in result.output
+
+
+def test_main_logout_delete_failure(runner: CliRunner, mocker: MockerFixture) -> None:
+    mocker.patch('mutt_oauth2.main.delete_from_keyring',
+                 side_effect=OAuth2Error('Failed to delete credential for `testuser`.'))
+    result = runner.invoke(main, ('--username', 'testuser', '--logout'))
+    assert result.exit_code == 1
+    assert 'Failed to delete credential for `testuser`.' in result.output
+
+
+def test_main_authorize_with_existing_token(runner: CliRunner, mock_saved_token: Mock,
+                                            mock_async_session: AsyncMock,
+                                            mocker: MockerFixture) -> None:
+    mock_saved_token.client_id = 'client_id'
+    mock_saved_token.email = 'test@example.com'
+    mock_saved_token.tenant = None
+    mock_saved_token.registration.scope = 'https://example.com/scope'
+    mock_saved_token.registration.authorize_endpoint = 'https://example.com/authorize'
+    mocker.patch('mutt_oauth2.main.http.server.HTTPServer')
+    mocker.patch('mutt_oauth2.main.get_localhost_redirect_uri',
+                 return_value=(8080, 'http://localhost:8080/'))
+    result = runner.invoke(main, ('--authorize',))
+    assert result.exit_code == 1
+    assert 'Did not obtain an authorisation code.' in result.output

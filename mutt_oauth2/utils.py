@@ -32,8 +32,8 @@ class _Pop3Shortcmd(Protocol):
         ...
 
 
-__all__ = ('OAuth2Error', 'SavedToken', 'get_localhost_redirect_uri', 'log_oauth2_error',
-           'try_auth')
+__all__ = ('OAuth2Error', 'SavedToken', 'delete_from_keyring', 'get_localhost_redirect_uri',
+           'log_oauth2_error', 'try_auth')
 
 
 class OAuth2Error(Exception):
@@ -53,6 +53,30 @@ def log_oauth2_error(data: dict[str, Any]) -> None:
         log.error('Error type: %s', data['error'])
         if 'error_description' in data:
             log.error('Description: %s', data['error_description'])
+
+
+def delete_from_keyring(username: str) -> None:
+    """
+    Delete a stored token from the keyring.
+
+    Parameters
+    ----------
+    username : str
+        Keyring username.
+
+    Raises
+    ------
+    OAuth2Error
+        If no credential exists for the username, or if deletion fails.
+    """
+    if keyring.get_password(KEYRING_SERVICE_NAME, username) is None:
+        msg = f'No stored credential found for `{username}`.'
+        raise OAuth2Error(msg)
+    try:
+        keyring.delete_password(KEYRING_SERVICE_NAME, username)
+    except keyring.errors.PasswordDeleteError as e:
+        msg = f'Failed to delete credential for `{username}`.'
+        raise OAuth2Error(msg) from e
 
 
 def build_sasl_string(registration: Registration, user: str, host: str, port: int,
@@ -234,7 +258,7 @@ class SavedToken:
         Raises
         ------
         OAuth2Error
-            If the token refresh fails.
+            If the token refresh fails, including ``invalid_grant`` errors.
         """
         if self.is_access_token_valid():  # pragma: no cover
             return
@@ -250,7 +274,7 @@ class SavedToken:
         r.raise_for_status()
         if (data := r.json()) and 'error' in data:
             log_oauth2_error(data)
-            raise OAuth2Error
+            raise OAuth2Error(data.get('error_description') or data['error'])
         self.update(data)
         self.persist(username)
 
@@ -302,7 +326,7 @@ class SavedToken:
             raise
         if isinstance(data, dict) and 'error' in data:
             log_oauth2_error(data)
-            raise OAuth2Error(data.get('error_description', data['error']))
+            raise OAuth2Error(data.get('error_description') or data['error'])
         r.raise_for_status()
         return data
 
@@ -336,7 +360,7 @@ class SavedToken:
         r.raise_for_status()
         if (data := r.json()) and 'error' in data:
             log_oauth2_error(data)
-            raise OAuth2Error
+            raise OAuth2Error(data.get('error_description') or data['error'])
         return data
 
     async def device_poll(self, device_code: str, session: AsyncSession) -> Any:
@@ -374,7 +398,7 @@ class SavedToken:
         r.raise_for_status()
         if (data := r.json()) and 'error' in data:
             log_oauth2_error(data)
-            raise OAuth2Error
+            raise OAuth2Error(data.get('error_description') or data['error'])
         return data
 
 
