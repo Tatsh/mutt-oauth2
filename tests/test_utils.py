@@ -288,6 +288,30 @@ async def test_saved_token_exchange_auth_for_access_raises_oauth2error_for_http_
     mock_response.raise_for_status.assert_not_called()
 
 
+async def test_saved_token_exchange_auth_for_access_value_error_on_non_json(
+        mocker: MockerFixture) -> None:
+    mock_response = MagicMock(json=MagicMock(side_effect=ValueError))
+    mock_response.raise_for_status = MagicMock()
+    mock_session = AsyncMock()
+    mock_session.post = AsyncMock(return_value=mock_response)
+    token = SavedToken(access_token_expiration=None,
+                       client_id='client_id',
+                       client_secret='client_secret',
+                       email='email',
+                       registration=Registration(sasl_method='XOAUTH2',
+                                                 authorize_endpoint='http://example.com/authorize',
+                                                 device_code_endpoint='http://example.com/device',
+                                                 token_endpoint='http://example.com/token',
+                                                 redirect_uri='http://localhost',
+                                                 imap_endpoint='imap.example.com',
+                                                 pop_endpoint='pop.example.com',
+                                                 smtp_endpoint='smtp.example.com',
+                                                 scope='email'))
+    with pytest.raises(ValueError):  # noqa: PT011
+        await token.exchange_auth_for_access('auth_code', 'verifier', 'redirect_uri', mock_session)
+    mock_response.raise_for_status.assert_called_once()
+
+
 async def test_saved_token_get_device_code(mocker: MockerFixture) -> None:
     mock_response = MagicMock(
         json=lambda: {
