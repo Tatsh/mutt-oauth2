@@ -28,9 +28,9 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "MUTT-OAUTH2" "1" "Apr 27, 2026" "0.2.0" "mutt-oauth2"
+.TH "MUTT-OAUTH2" "1" "Jul 08, 2026" "0.2.1" "mutt-oauth2"
 .SH NAME
-mutt-oauth2 \- mutt-oauth2 v0.2.0
+mutt-oauth2 \- mutt-oauth2 v0.2.1
 .sp
 This is an update of \X'tty: link https://github.com/muttmua/mutt/blob/master/contrib/mutt_oauth2.py'\fI\%Alexander Perlis\(aq script\fP\X'tty: link'
 and conversion to a package. Instead of using GPG for token storage, this package uses Keyring.
@@ -59,6 +59,11 @@ Manually authorise new tokens.
 .TP
 .B \-d, \-\-debug
 Enable debug logging.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-l, \-\-logout
+Remove stored tokens from the keyring.
 .UNINDENT
 .INDENT 0.0
 .TP

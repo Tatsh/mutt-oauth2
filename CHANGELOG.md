@@ -9,6 +9,24 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [unreleased]
 
+## [0.2.1] - 2026-07-08
+
+### Added
+
+- `--logout` flag to clear the stored token from the keyring. An error is reported if no stored
+  credential exists or deletion fails.
+
+### Changed
+
+- `--authorize` now re-authorises even when a token is already stored.
+
+### Fixed
+
+- `invalid_grant` errors raised during token refresh are now reported instead of being ignored.
+- OAuth2 error payloads returned during the authorisation code token exchange are now reported
+  instead of a generic HTTP status error.
+- Exit with an error when no token is available instead of continuing.
+
 ## [0.2.0] - 2026-04-26
 
 ### Added
@@ -58,7 +76,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Added content to `index.rst` based on README
 - Man page
 
-[unreleased]: https://github.com/Tatsh/mutt-oauth2/compare/v0.2.0...HEAD
+[unreleased]: https://github.com/Tatsh/mutt-oauth2/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/Tatsh/mutt-oauth2/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Tatsh/mutt-oauth2/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/Tatsh/mutt-oauth2/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/Tatsh/mutt-oauth2/compare/v0.1.0...v0.1.1
