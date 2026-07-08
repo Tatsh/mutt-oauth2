@@ -201,7 +201,8 @@ jobs:
         run: |
           rm -fR _out
           mkdir _out
-          zip -j "_out/mutt-oauth2-${REF_NAME}-${SUFFIX}.zip" "$DIST_PATH"
+          # shellcheck disable=SC2086 # DIST_PATH is a glob and must expand.
+          zip -j "_out/mutt-oauth2-${REF_NAME}-${SUFFIX}.zip" $DIST_PATH
       - if: (matrix.os == 'windows-latest' || matrix.os == 'windows-11-arm') && github.ref_type == 'tag'
         name: 'Zip files'
         env:

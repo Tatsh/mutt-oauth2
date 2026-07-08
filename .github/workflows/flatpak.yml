@@ -32,6 +32,7 @@ jobs:
           subject-path: '${{ steps.flatpak_bundle.outputs.filename }}'
       - env:
           FILE: '${{ steps.flatpak_bundle.outputs.filename }}'
+          GH_REPO: '${{ github.repository }}'
           GH_TOKEN: '${{ github.token }}'
         if: "github.ref_type == 'tag'"
         name: 'Create or update draft release'
