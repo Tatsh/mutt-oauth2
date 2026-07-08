@@ -107,7 +107,6 @@ signtool
 smtplib
 snapcore
 snapcraft
-softprops
 soupsieve
 sphinxcontrib
 statusline
@@ -130,6 +129,7 @@ vendored
 venv
 vers
 virtualenv
+winget
 wiswa
 wiswa's
 worktree
@@ -138,3 +138,4 @@ xoauth
 yapf
 yapfignore
 yarnrc
+zizmor

@@ -25,7 +25,9 @@ repos:
       - id: 'check-toml'
       - id: 'debug-statements'
       - id: 'destroyed-symlinks'
-      - id: 'detect-aws-credentials'
+      - args:
+          - '--allow-missing-credentials'
+        id: 'detect-aws-credentials'
       - id: 'detect-private-key'
       - exclude: "^vcpkg.*\\.json$"
         id: 'end-of-file-fixer'
@@ -44,7 +46,7 @@ repos:
           - '--frozen'
         id: 'uv-sync'
     repo: 'https://github.com/astral-sh/uv-pre-commit'
-    rev: '0.11.26'
+    rev: '0.11.28'
   - hooks:
       - args:
           - '--fix'
@@ -67,6 +69,10 @@ repos:
         name: 'validate package.json'
     repo: 'https://github.com/python-jsonschema/check-jsonschema'
     rev: '0.37.4'
+  - hooks:
+      - id: 'zizmor'
+    repo: 'https://github.com/zizmorcore/zizmor-pre-commit'
+    rev: 'v1.26.1'
   - hooks:
       - id: 'validate-cff'
     repo: 'https://github.com/citation-file-format/cffconvert'
