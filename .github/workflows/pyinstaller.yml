@@ -232,6 +232,7 @@ jobs:
         run: |
           gh release create "$GITHUB_REF_NAME" --draft --notes '' _out/*.zip ||
             gh release upload "$GITHUB_REF_NAME" _out/*.zip --clobber
+        shell: 'bash'
     strategy:
       matrix:
         include:
