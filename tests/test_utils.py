@@ -307,7 +307,7 @@ async def test_saved_token_exchange_auth_for_access_value_error_on_non_json(
                                                  pop_endpoint='pop.example.com',
                                                  smtp_endpoint='smtp.example.com',
                                                  scope='email'))
-    with pytest.raises(ValueError):  # noqa: PT011
+    with pytest.raises(ValueError):  # ruff:ignore[pytest-raises-too-broad]
         await token.exchange_auth_for_access('auth_code', 'verifier', 'redirect_uri', mock_session)
     mock_response.raise_for_status.assert_called_once()
 
@@ -484,7 +484,7 @@ async def test_try_auth_raises_runtime_error_on_pop_auth(mocker: MockerFixture) 
     mock_smtp_instance.execute_command = AsyncMock(return_value=MagicMock(code=235))
     mock_smtp.return_value = mock_smtp_instance
     mock_pop = mocker.patch('mutt_oauth2.utils.poplib.POP3_SSL')
-    mock_pop.return_value._shortcmd.side_effect = poplib.error_proto(  # noqa: SLF001
+    mock_pop.return_value._shortcmd.side_effect = poplib.error_proto(  # ruff:ignore[private-member-access]
         'Authentication failed')
     token = SavedToken(access_token_expiration=None,
                        client_id='client_id',

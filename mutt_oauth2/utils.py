@@ -460,9 +460,9 @@ async def try_auth(token: SavedToken, *, debug: bool = False) -> None:
             if debug:  # pragma: no cover
                 pop_conn.set_debuglevel(2)
             pop_via_shortcmd = cast('_Pop3Shortcmd', pop_conn)
-            pop_via_shortcmd._shortcmd(  # noqa: SLF001
+            pop_via_shortcmd._shortcmd(  # ruff:ignore[private-member-access]
                 f'AUTH {token.registration.sasl_method}')
-            pop_via_shortcmd._shortcmd(  # noqa: SLF001
+            pop_via_shortcmd._shortcmd(  # ruff:ignore[private-member-access]
                 standard_b64encode(sasl_string.encode()).decode())
 
         try:

@@ -19,7 +19,7 @@ class _HandlerWithDoGet(Protocol):
     path: str
     request_version: str
 
-    def do_GET(self) -> None:  # noqa: N802
+    def do_GET(self) -> None:  # ruff:ignore[invalid-function-name]
         ...
 
 
