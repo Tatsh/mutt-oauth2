@@ -1,4 +1,5 @@
 """Registration information for OAuth2 providers."""
+# ruff: file-ignore[hardcoded-password-func-arg]
 from __future__ import annotations
 
 from dataclasses import dataclass

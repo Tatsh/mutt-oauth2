@@ -175,7 +175,7 @@ jobs:
           path: |
             ${{ matrix.dist_path }}
       - name: 'Attest'
-        uses: 'actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6'
+        uses: 'actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6'
         with:
           subject-path: '${{ matrix.dist_path }}'
       - name: 'Generate SBOM'
@@ -188,7 +188,7 @@ jobs:
           output-file: 'sbom.spdx.json'
           upload-artifact: false
       - name: 'Attest SBOM'
-        uses: 'actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6'
+        uses: 'actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6'
         with:
           subject-path: '${{ matrix.dist_path }}'
           sbom-path: 'sbom.spdx.json'
@@ -216,12 +216,12 @@ jobs:
         shell: pwsh
       - if: github.ref_type == 'tag'
         name: 'Attest'
-        uses: 'actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6'
+        uses: 'actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6'
         with:
           subject-path: '_out/*.zip'
       - if: github.ref_type == 'tag'
         name: 'Attest SBOM'
-        uses: 'actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6'
+        uses: 'actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6'
         with:
           subject-path: '_out/*.zip'
           sbom-path: 'sbom.spdx.json'
@@ -232,7 +232,6 @@ jobs:
         run: |
           gh release create "$GITHUB_REF_NAME" --draft --notes '' _out/*.zip ||
             gh release upload "$GITHUB_REF_NAME" _out/*.zip --clobber
-        shell: 'bash'
     strategy:
       matrix:
         include:
