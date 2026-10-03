@@ -1,7 +1,6 @@
 aioimaplib
 aiosmtplib
 anchore
-Ångström
 anyio
 appdir
 appimage
@@ -9,6 +8,7 @@ appinfo
 asyncio
 autodoc
 automodule
+autouse
 bascom
 bsky
 cdrommsf
@@ -16,7 +16,6 @@ codesign
 colorlog
 commitizen
 conftest
-cooldown
 coveragerc
 coverallsapp
 ctypes
@@ -31,6 +30,7 @@ doctrees
 dunder
 eeyore
 elif
+endswith
 esac
 esbenp
 esbonio
@@ -45,7 +45,6 @@ handoff
 hoverxref
 htmlcov
 imaplib
-intersphinx
 isort
 itertools
 jinja
@@ -68,9 +67,13 @@ myproject
 mypy
 namedtuples
 niquests
+noone
+noqa
 norecursedirs
 notarytool
+nullglob
 numpy
+numpydoc
 oauthbearer
 onefile
 oneline
@@ -79,6 +82,7 @@ pavelzw
 perlis
 pipx
 plistlib
+popen
 poplib
 preapproved
 prodvers
@@ -96,12 +100,14 @@ pythonhosted
 regen
 ripgreprc
 rstcheck
+sbclaude
 schemafile
 sdist
 secretless
 setattr
 shellcheck
 shellformat
+shopt
 shortcmd
 signtool
 smtplib
@@ -132,10 +138,10 @@ virtualenv
 winget
 wiswa
 wiswa's
-worktree
 xcrun
 xoauth
 yapf
 yapfignore
 yarnrc
 zizmor
+Ångström

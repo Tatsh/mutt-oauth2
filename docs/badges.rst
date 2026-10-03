@@ -68,9 +68,9 @@
       :target: https://github.com/Tatsh/mutt-oauth2/stargazers
       :alt: Stargazers
 
-   .. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit
-      :target: https://github.com/pre-commit/pre-commit
-      :alt: pre-commit
+   .. image:: https://results.pre-commit.ci/badge/github/Tatsh/mutt-oauth2/master.svg
+      :target: https://results.pre-commit.ci/latest/github/Tatsh/mutt-oauth2/master
+      :alt: pre-commit.ci status
 
    .. image:: https://img.shields.io/badge/Prettier-black?logo=prettier
       :target: https://prettier.io/

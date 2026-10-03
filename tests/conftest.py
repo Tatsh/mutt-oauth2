@@ -6,8 +6,9 @@ from unittest.mock import AsyncMock, Mock
 import os
 
 from click.testing import CliRunner
-from mutt_oauth2.utils import SavedToken
 import pytest
+
+from mutt_oauth2.utils import SavedToken
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
