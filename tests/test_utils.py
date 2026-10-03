@@ -6,6 +6,10 @@ from unittest.mock import AsyncMock, MagicMock
 import json
 import poplib
 
+import aiosmtplib
+import niquests
+import pytest
+
 from mutt_oauth2.registrations import Registration
 from mutt_oauth2.utils import (
     OAuth2Error,
@@ -17,9 +21,6 @@ from mutt_oauth2.utils import (
     object_hook,
     try_auth,
 )
-import aiosmtplib
-import niquests
-import pytest
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture

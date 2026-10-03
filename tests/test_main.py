@@ -3,10 +3,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Protocol, cast
 from unittest.mock import AsyncMock, Mock
 
-from mutt_oauth2.main import get_handler, main
-from mutt_oauth2.utils import OAuth2Error, SavedToken
 from typing_extensions import Self
 import niquests
+
+from mutt_oauth2.main import get_handler, main
+from mutt_oauth2.utils import OAuth2Error, SavedToken
 
 if TYPE_CHECKING:
     from collections.abc import Callable
