@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Protocol, cast
+from typing import TYPE_CHECKING, Any, Protocol, Self, cast
 from unittest.mock import AsyncMock, Mock
 
-from typing_extensions import Self
 import niquests
 
 from mutt_oauth2.main import get_handler, main

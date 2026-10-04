@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from base64 import standard_b64encode
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any, Protocol, cast
 import asyncio
 import contextlib
@@ -122,7 +122,7 @@ def object_hook(d: dict[str, Any]) -> Any:
         with contextlib.suppress(ValueError):
             d['access_token_expiration'] = datetime.fromtimestamp(float(
                 d['access_token_expiration']),
-                                                                  tz=timezone.utc)
+                                                                  tz=UTC)
     if 'registration' in d:
         d['registration'] = Registration(**d['registration'])
     return d
@@ -196,7 +196,7 @@ class SavedToken:
             Token response data from the authorisation server.
         """
         self.access_token = data['access_token']
-        self.access_token_expiration = (datetime.now(tz=timezone.utc) +
+        self.access_token_expiration = (datetime.now(tz=UTC) +
                                         timedelta(seconds=int(data['expires_in'])))
         if 'refresh_token' in data:
             self.refresh_token = data['refresh_token']
@@ -222,7 +222,7 @@ class SavedToken:
             True if the access token is still valid.
         """
         if self.access_token_expiration:
-            return datetime.now(tz=timezone.utc) < self.access_token_expiration
+            return datetime.now(tz=UTC) < self.access_token_expiration
         return False
 
     def as_json(self, indent: int | None = None) -> str:

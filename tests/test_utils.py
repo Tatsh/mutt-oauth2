@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
 import json
@@ -135,7 +135,7 @@ def test_saved_token_update() -> None:
     token.update(data)
     assert token.access_token == 'new_token'
     assert token.access_token_expiration is not None
-    assert token.access_token_expiration > datetime.now(tz=timezone.utc)
+    assert token.access_token_expiration > datetime.now(tz=UTC)
 
 
 def test_saved_token_persist(mocker: MockerFixture) -> None:
@@ -158,20 +158,19 @@ def test_saved_token_persist(mocker: MockerFixture) -> None:
 
 
 def test_saved_token_is_access_token_valid() -> None:
-    token = SavedToken(
-        access_token_expiration=datetime.now(tz=timezone.utc) + timedelta(seconds=3600),
-        client_id='client_id',
-        client_secret='client_secret',
-        email='email',
-        registration=Registration(sasl_method='XOAUTH2',
-                                  authorize_endpoint='http://example.com/authorize',
-                                  device_code_endpoint='http://example.com/device',
-                                  token_endpoint='http://example.com/token',
-                                  redirect_uri='http://localhost',
-                                  imap_endpoint='imap.example.com',
-                                  pop_endpoint='pop.example.com',
-                                  smtp_endpoint='smtp.example.com',
-                                  scope='email'))
+    token = SavedToken(access_token_expiration=datetime.now(tz=UTC) + timedelta(seconds=3600),
+                       client_id='client_id',
+                       client_secret='client_secret',
+                       email='email',
+                       registration=Registration(sasl_method='XOAUTH2',
+                                                 authorize_endpoint='http://example.com/authorize',
+                                                 device_code_endpoint='http://example.com/device',
+                                                 token_endpoint='http://example.com/token',
+                                                 redirect_uri='http://localhost',
+                                                 imap_endpoint='imap.example.com',
+                                                 pop_endpoint='pop.example.com',
+                                                 smtp_endpoint='smtp.example.com',
+                                                 scope='email'))
     assert token.is_access_token_valid()
 
 
@@ -599,12 +598,11 @@ def test_saved_token_is_access_token_valid_none_expiration() -> None:
 
 
 def test_saved_token_is_access_token_expired() -> None:
-    token = SavedToken(
-        access_token_expiration=datetime.now(tz=timezone.utc) - timedelta(seconds=3600),
-        client_id='client_id',
-        client_secret='client_secret',
-        email='email',
-        registration=MagicMock())
+    token = SavedToken(access_token_expiration=datetime.now(tz=UTC) - timedelta(seconds=3600),
+                       client_id='client_id',
+                       client_secret='client_secret',
+                       email='email',
+                       registration=MagicMock())
     assert not token.is_access_token_valid()
 
 
