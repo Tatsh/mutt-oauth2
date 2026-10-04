@@ -121,7 +121,6 @@ tatsh
 testpaths
 tharvik
 toctree
-tomlkit
 tomllib
 tomlq
 tonumber
