@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.11, <4.0"
 resolution-markers = [
     "python_full_version >= '3.15'",
@@ -14,11 +14,11 @@ exclude-newer-span = "P1W"
 
 [[package]]
 name = "aioimaplib"
-version = "2.0.1"
+version = "2.0.3"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/ee/da/a454c47fb8522e607425e15bf1f49ccfdb3d75f4071f40b63ebd49573495/aioimaplib-2.0.1.tar.gz", hash = "sha256:5a494c3b75f220977048f5eb2c7ba9c0570a3148aaf38bee844e37e4d7af8648", size = 35555, upload-time = "2025-01-16T10:38:23.14Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d1/8e/8bb051d41c1b285cfb389c5728ba22e572db47952d6b19c2eee42d5780b2/aioimaplib-2.0.3.tar.gz", hash = "sha256:0a7c3e558af754a7ca8b5927be07c4ab6a0b7cd963174ca4290f6b0d51d4616b", size = 35840, upload-time = "2026-10-13T05:18:11.019Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/13/52/48aaa287fb3c4c995edcb602370b10d182dc5c48371df7cb3a404356733f/aioimaplib-2.0.1-py3-none-any.whl", hash = "sha256:727e00c35cf25106bd34611dddd6e2ddf91a5f1a7e72d9269f3ce62486b31e14", size = 34729, upload-time = "2025-01-16T10:38:20.427Z" },
+    { url = "https://files.pythonhosted.org/packages/34/34/cfe20c82f447cf6224decb165ad9887e6c079cd1e21fffa2f9da41191b18/aioimaplib-2.0.3-py3-none-any.whl", hash = "sha256:799273d22cd1b57d8d2fba18376dc4a861ca5b90c548ffb53a003f2506ff64bc", size = 35246, upload-time = "2026-10-13T05:18:12.256Z" },
 ]
 
 [[package]]
@@ -1457,6 +1457,7 @@ wheels = [
 name = "mutt-oauth2"
 version = "0.2.1"
 source = { editable = "." }
+default-groups = "all"
 dependencies = [
     { name = "aioimaplib" },
     { name = "aiosmtplib" },
