@@ -440,7 +440,7 @@ async def try_auth(token: SavedToken, *, debug: bool = False) -> None:
                 imap_conn.timeout)
             if response.result != 'OK':
                 raise aioimaplib.AioImapException(str(response.lines))
-            await imap_conn.list('""', '*')  # ty: ignore[invalid-argument-type]
+            await imap_conn.list('""', '*')
 
         try:
             await _authenticate()
