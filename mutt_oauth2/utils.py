@@ -427,15 +427,15 @@ async def try_auth(token: SavedToken, *, debug: bool = False) -> None:
                                             token.registration.imap_endpoint, 993,
                                             token.access_token)
             encoded = standard_b64encode(sasl_string.encode()).decode()
-            protocol = imap_conn.protocol
+            protocol = cast('aioimaplib.IMAP4ClientProtocol', imap_conn.protocol)
             response = await asyncio.wait_for(
-                protocol.execute(  # ty: ignore[unresolved-attribute]
+                protocol.execute(
                     aioimaplib.Command(
                         'AUTHENTICATE',
-                        protocol.new_tag(),  # ty: ignore[unresolved-attribute]
+                        protocol.new_tag(),
                         token.registration.sasl_method,
                         encoded,
-                        loop=protocol.loop  # ty: ignore[invalid-argument-type,unresolved-attribute]
+                        loop=protocol.loop  # ty: ignore[invalid-argument-type]
                     )),
                 imap_conn.timeout)
             if response.result != 'OK':
