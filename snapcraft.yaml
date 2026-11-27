@@ -20,7 +20,8 @@ parts:
     plugin: 'python'
     python-packages:
       - '.'
-    source: '.'
+    source: 'https://github.com/Tatsh/mutt-oauth2.git'
+    source-tag: 'v0.2.1'
     stage-packages: []
 platforms:
   amd64:

@@ -15,8 +15,9 @@ modules:
     buildsystem: 'simple'
     name: 'mutt-oauth2'
     sources:
-      - path: '.'
-        type: 'dir'
+      - tag: 'v0.2.1'
+        type: 'git'
+        url: 'https://github.com/Tatsh/mutt-oauth2'
 runtime: 'org.freedesktop.Platform'
 runtime-version: '26.08'
 sdk: 'org.freedesktop.Sdk'
